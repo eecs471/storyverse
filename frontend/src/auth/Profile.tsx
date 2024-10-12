@@ -9,7 +9,8 @@ export const Profile = () => {
 
     return (
         <div className="profile">
-            Under Development
+            Under Development      
+            <button onClick={() => navigate("/")}> Go Back to Homepage </button>
         </div>
     )
 }

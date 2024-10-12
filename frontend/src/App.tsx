@@ -11,7 +11,7 @@ import { Login } from "./auth/Login"
 import { Signup } from "./auth/Signup"
 import { Profile } from "./auth/Profile"
 import { Routes, Route } from 'react-router-dom';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Storyverse from './storyverse.png'
 import _ from 'lodash';
 
@@ -19,6 +19,7 @@ import _ from 'lodash';
 function App() {
   // For navigating between different components
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [currentPage, setCurrentPage] = useState(0)
   const [currentStoryPage, setCurrentStoryPage] = useState(0)
@@ -63,7 +64,7 @@ function App() {
         <Route path="/profile" element={<Profile />} />
       </Routes>
       
-      {auth.currentUser && <Box boxSize='sm'>
+      {auth.currentUser && location.pathname === '/' && <Box boxSize='sm'>
         {
           currentPage === 0 ?
             <div className="grid">
@@ -121,7 +122,7 @@ function App() {
                 </div>
         }
       </Box>}
-      {auth.currentUser && <Link to="/profile"> <strong>Profile</strong> </Link>}
+      {auth.currentUser && location.pathname === '/' && <Link to="/profile"> <strong>Profile</strong> </Link>}
     </div>
   );
 }
