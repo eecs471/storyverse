@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import { useQuery } from '@tanstack/react-query';
 import { QUIZ_RESPONSE_SCHEMA, STORY_RESPONSE_SCHEMA, fetchQuizResponse, fetchStory } from './constants';
@@ -6,11 +6,20 @@ import { Textarea, Button, Box, Input } from '@chakra-ui/react'
 import { Image } from '@chakra-ui/react'
 import { Text } from '@chakra-ui/react'
 import { CheckCircleIcon, CloseIcon } from '@chakra-ui/icons'
+import { auth } from "./config/firebase"
+import { Login } from "./auth/Login"
+import { Signup } from "./auth/Signup"
+import { Profile } from "./auth/Profile"
+import { Routes, Route } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Storyverse from './storyverse.png'
 import _ from 'lodash';
 
 
 function App() {
+  // For navigating between different components
+  const navigate = useNavigate();
+
   const [currentPage, setCurrentPage] = useState(0)
   const [currentStoryPage, setCurrentStoryPage] = useState(0)
   const [currentAge, setCurrentAge] = useState('')
@@ -28,6 +37,13 @@ function App() {
     enabled: false
   })
 
+  useEffect(() => {
+    // Ensure user is logged in before rendering
+    if (!auth.currentUser) {
+        navigate('/login');
+    }
+  }, []);
+
   const onClickPt1 = async () => {
     await refetch()
     setCurrentPage(currentPage + 1)
@@ -40,7 +56,14 @@ function App() {
 
   return (
     <div className="App">
-      <Box boxSize='sm'>
+      <Routes>
+        <Route path="/" element={<strong>Homepage</strong>} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/profile" element={<Profile />} />
+      </Routes>
+      
+      {auth.currentUser && <Box boxSize='sm'>
         {
           currentPage === 0 ?
             <div className="grid">
@@ -97,7 +120,8 @@ function App() {
                   {quizData?.llm_response ? <Text>{quizData.llm_response}</Text> : null}
                 </div>
         }
-      </Box>
+      </Box>}
+      {auth.currentUser && <Link to="/profile"> <strong>Profile</strong> </Link>}
     </div>
   );
 }
