@@ -105,6 +105,8 @@ export const Profile = () => {
     return (
         <div className="profile" style={{display: 'flex', flexDirection: 'column'}}>
             <div>
+                <strong style={{fontSize: 20}}> {name}'s Profile </strong>
+                
                 <p>Current Name: {name}</p>
                 <input
                     placeholder="New Name"
