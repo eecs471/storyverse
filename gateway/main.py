@@ -22,7 +22,7 @@ from langchain_openai import OpenAI
 
 openai.api_key = os.environ['OPENAI_API_KEY']
 
-chat_llm_model = "gpt-3.5-turbo-0301"
+chat_llm_model = "gpt-3.5-turbo"
 chat = ChatOpenAI(temperature=0.0, model=chat_llm_model)
 
 image_llm = OpenAI(temperature=0.9)
@@ -152,7 +152,7 @@ def _generate_image_stable_diff(image_desc):
         "sessionKey": "921f5c1d53fd74664f3e2366a613bfaafecc0621",
         "type": "image"
     }, headers={
-        "Authorization": "Bearer 682d9fcc8e9b12a8df507385bb835b280dcfd226c5c1d8dc41ddb0b1decd5eb1",
+        "Authorization": "Bearer 82381b45340278d6eb5f77eb6abcb7700d5aa286112149c042c2919c92f83805",
     })
     images = json.loads(response.content)
     print("AT TRACE:")
@@ -244,4 +244,4 @@ async def quiz_response(request_body: QuizResponseRequestBody):
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="localhost", port=8000, reload=True)

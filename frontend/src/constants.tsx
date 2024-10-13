@@ -1,7 +1,8 @@
 import axios from "axios"
 
 
-const GENERATE_API = process.env.REACT_APP_BACKEND_URL
+//const GENERATE_API = process.env.REACT_APP_BACKEND_URL
+const GENERATE_API = "http://localhost:8000"
 
 export type STORY_REQUEST_SCHEMA = {
     prompt: string
