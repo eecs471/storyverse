@@ -12,13 +12,13 @@ from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv())
 
 import json
-from langchain.chat_models import ChatOpenAI
+from langchain_openai import ChatOpenAI
 from langchain.prompts import ChatPromptTemplate
 
-from langchain.utilities.dalle_image_generator import DallEAPIWrapper
+from langchain_community.utilities.dalle_image_generator import DallEAPIWrapper
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain.llms import OpenAI
+from langchain_openai import OpenAI
 
 openai.api_key = os.environ['OPENAI_API_KEY']
 
