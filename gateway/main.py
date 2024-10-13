@@ -7,6 +7,9 @@ from enum import Enum
 import uvicorn
 import requests
 from fastapi.middleware.cors import CORSMiddleware
+from together import Together
+import requests
+import base64
 
 from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv())
@@ -139,25 +142,28 @@ def _generate_image_stable_diff(image_desc):
         The following is a description of a scene: {0}.
     """.format(image_desc)
 
-    response = requests.post(together_ai, json={
-        "model": "stabilityai/stable-diffusion-xl-base-1.0",
-        "prompt": template,
-        "negative_prompt": "",
-        "request_type": "image-model-inference",
-        "width": 1024,
-        "height": 1024,
-        "steps": 20,
-        "n": 1,
-        "seed": 42,
-        "sessionKey": "921f5c1d53fd74664f3e2366a613bfaafecc0621",
-        "type": "image"
-    }, headers={
-        "Authorization": "Bearer 82381b45340278d6eb5f77eb6abcb7700d5aa286112149c042c2919c92f83805",
-    })
-    images = json.loads(response.content)
+    client = Together(api_key=os.environ.get('TOGETHER_API_KEY'))
+    response = client.images.generate(
+        model="stabilityai/stable-diffusion-xl-base-1.0",
+        prompt=template,
+        #"negative_prompt": "",
+        #"request_type": "image-model-inference",
+        width=1024,
+        height=1024,
+        steps=20,
+        n=1
+        #"seed": 42,
+        #"sessionKey": "921f5c1d53fd74664f3e2366a613bfaafecc0621",
+        #"type": "image"
+    )
+    images = response.data
     print("AT TRACE:")
-    image = images['output']['choices'][0]
-    return image
+    image_url = images[0].url
+    response = requests.get(image_url)
+    if response.status_code == 200:
+        image = base64.b64encode(response.content).decode('utf-8')
+        return image
+    return ""
 
 def generate_images(image_descriptions, age):
     images = {}
@@ -215,8 +221,8 @@ async def generate(request_body: StoryGenerateRequestBody):
 
     for i in range(len(descriptions)):
         r = {
-            "page_text": story[str(i+1)],
-            "image": images[str(i+1)]['image_base64']
+            "page_text": story["paragraph" + str(i+1)],
+            "image": images["paragraph" + str(i+1)]
         }
         return_val["story"].append(r)
     
