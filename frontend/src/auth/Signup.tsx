@@ -67,9 +67,10 @@ export const Signup = () => {
             <div className="interest">
                 <input
                     placeholder="Interest"
+                    value={interest}
                     onChange={(e) => setInterest(e.target.value)}
                 />
-                <button onClick={() => setInterests([...interests, interest])}> Add </button>
+                <button onClick={() => {setInterests([...interests, interest]); setInterest("")}}> Add </button>
             </div>
 
             {interests.length > 0 ? <strong>Interests:</strong> : <strong>No Interests Added</strong>}

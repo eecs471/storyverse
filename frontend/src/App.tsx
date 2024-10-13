@@ -12,6 +12,7 @@ import { Signup } from "./auth/Signup"
 import { Profile } from "./auth/Profile"
 import { Routes, Route } from 'react-router-dom';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { signOut } from "firebase/auth"
 import Storyverse from './storyverse.png'
 import _ from 'lodash';
 
@@ -53,6 +54,16 @@ function App() {
   const onClickPt2 = async () => {
     await refetchQuizResponse()
     setCurrentPage(currentPage + 1)
+  }
+
+  const logout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    }
+    catch(err) {
+      console.error(err);
+    }
   }
 
   return (
@@ -123,6 +134,7 @@ function App() {
         }
       </Box>}
       {auth.currentUser && location.pathname === '/' && <Link to="/profile"> <strong>Profile</strong> </Link>}
+      {auth.currentUser && location.pathname === '/' && <Button onClick={logout}> <strong>Logout</strong> </Button>}
     </div>
   );
 }
