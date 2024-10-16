@@ -3,6 +3,7 @@ import {  deleteUser } from 'firebase/auth';
 import { useEffect, useState } from "react"
 import { useNavigate } from 'react-router-dom';
 import { getDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { Navbar } from "../Navbar"
 
 export const Profile = () => {
     const navigate = useNavigate();
@@ -103,48 +104,51 @@ export const Profile = () => {
     }
 
     return (
-        <div className="profile" style={{display: 'flex', flexDirection: 'column'}}>
-            <div>
-                <strong style={{fontSize: 20}}> {name}'s Profile </strong>
-                
-                <p>Current Name: {name}</p>
-                <input
-                    placeholder="New Name"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                />
+        <>
+            <Navbar />
+            <div className="profile" style={{display: 'flex', flexDirection: 'column'}}>
+                <div>
+                    <strong style={{fontSize: 20}}> {name}'s Profile </strong>
+                    
+                    <p>Current Name: {name}</p>
+                    <input
+                        placeholder="New Name"
+                        value={newName}
+                        onChange={(e) => setNewName(e.target.value)}
+                    />
 
-                <button onClick={changeName}> Update Name </button>
+                    <button onClick={changeName}> Update Name </button>
+                </div>
+
+                <div>
+                    <p>Current Age: {age}</p>
+                    <input
+                        placeholder="New Age"
+                        type="number"
+                        value={newAge}
+                        onChange={(e) => setNewAge(Number(e.target.value))}
+                    />
+                    <button onClick={changeAge}> Update Age </button>
+                </div>
+
+                <div className="interest">
+                    <input
+                        placeholder="Add Interest"
+                        value={interest}
+                        onChange={(e) => setInterest(e.target.value)}
+                    />
+                    <button onClick={addInterest}> Add </button>
+                </div>
+
+                {interests.length > 0 ? <strong>Interests:</strong> : <strong>No Interests Added</strong>}
+
+                {interests.map((interest) => (
+                    <p>{interest} <button onClick={() => removeInterest(interest)}> Remove </button></p>
+                ))}
+
+                <button onClick={deleteAccount}> Delete Account </button>
+                <button onClick={() => navigate("/")}> Go Back to Homepage </button>
             </div>
-
-            <div>
-                <p>Current Age: {age}</p>
-                <input
-                    placeholder="New Age"
-                    type="number"
-                    value={newAge}
-                    onChange={(e) => setNewAge(Number(e.target.value))}
-                />
-                <button onClick={changeAge}> Update Age </button>
-            </div>
-
-            <div className="interest">
-                <input
-                    placeholder="Add Interest"
-                    value={interest}
-                    onChange={(e) => setInterest(e.target.value)}
-                />
-                <button onClick={addInterest}> Add </button>
-            </div>
-
-            {interests.length > 0 ? <strong>Interests:</strong> : <strong>No Interests Added</strong>}
-
-            {interests.map((interest) => (
-                <p>{interest} <button onClick={() => removeInterest(interest)}> Remove </button></p>
-            ))}
-
-            <button onClick={deleteAccount}> Delete Account </button>
-            <button onClick={() => navigate("/")}> Go Back to Homepage </button>
-        </div>
+        </>
     )
 }

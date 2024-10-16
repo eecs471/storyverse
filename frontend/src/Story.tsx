@@ -13,6 +13,7 @@ import { Profile } from "./auth/Profile"
 import { Routes, Route } from 'react-router-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { signOut } from "firebase/auth"
+import { Navbar } from "./Navbar"
 import Storyverse from './storyverse.png'
 import _ from 'lodash';
 
@@ -55,79 +56,70 @@ function Story() {
     setCurrentPage(currentPage + 1)
   }
 
-  const logout = async () => {
-    try {
-      await logout();
-      navigate("/login");
-    }
-    catch(err) {
-      console.error(err);
-    }
-  }
-
   return (
-    <div className="Story">
-      <Box boxSize='sm'>
-        {
-          currentPage === 0 ?
-            <div className="grid">
-              <Text as='b' fontSize='2xl'>
-                Welcome to the Storyverse!
-              </Text>
-              <Image src={Storyverse} />
-              <Input placeholder={"Input your age"} value={currentAge} onChange={(e) => setCurrentAge(e.target.value)} />
-              <Textarea
-                placeholder="Talk about the story you want to read"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-              />
-              <Button onClick={onClickPt1} isLoading={isLoading}>Generate</Button>
-            </div> :
-            currentPage === 1 ?
-              <div className="grid">
-                {data && data?.story.length > 0 ?
-                  <>
-                    {_.map(data.story, (x, i) => (
-                      i === currentStoryPage ? <Image src={`data:image/png;base64,${data.story[i].image}`} /> : null
-                    ))}
-                    <Text>{data.story[currentStoryPage].page_text}</Text>
-                    <div className="split">
-                      <Button onClick={() => {
-                        if (currentStoryPage === 0) return
-
-                        setCurrentStoryPage(currentStoryPage - 1)
-                      }} disabled={currentStoryPage === 0}>Back</Button>
-                      <Text>Page {currentStoryPage + 1} of {data.story.length}</Text>
-                      <Button onClick={() => {
-                        if (currentStoryPage === data?.story.length - 1) {
-                          setCurrentPage(currentPage + 1)
-                        } else {
-                          setCurrentStoryPage(currentStoryPage + 1)
-                        }
-                      }}>{currentStoryPage === data?.story.length - 1 ? "Quiz" : "Next"}</Button>
-                    </div>
-                  </>
-                  : null}
-              </div> : currentPage === 2 ?
+    <>
+        <Navbar />
+        <div className="Story">
+        <Box boxSize='sm'>
+            {
+            currentPage === 0 ?
                 <div className="grid">
-                  <Text>{data ? data?.first_question : null}</Text>
-                  <Textarea
-                    placeholder="Answer here"
+                <Text as='b' fontSize='2xl'>
+                    Welcome to the Storyverse!
+                </Text>
+                <Image src={Storyverse} />
+                <Input placeholder={"Input your age"} value={currentAge} onChange={(e) => setCurrentAge(e.target.value)} />
+                <Textarea
+                    placeholder="Talk about the story you want to read"
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                  />
-                  <Button onClick={onClickPt2} isLoading={isQuizDataLoading}>Grade</Button>
+                />
+                <Button onClick={onClickPt1} isLoading={isLoading}>Generate</Button>
                 </div> :
+                currentPage === 1 ?
                 <div className="grid">
-                  {quizData?.is_correct ? <CheckCircleIcon boxSize={14} color={'green'} /> : <CloseIcon color={'red'} />}
-                  {quizData?.image ? <Image src={quizData.image} /> : null}
-                  {quizData?.llm_response ? <Text>{quizData.llm_response}</Text> : null}
-                </div>
-        }
-      </Box>
-      <Link to="/profile"> <strong>Profile</strong> </Link>
-      <Button onClick={logout}> <strong>Logout</strong> </Button>
-    </div>
+                    {data && data?.story.length > 0 ?
+                    <>
+                        {_.map(data.story, (x, i) => (
+                        i === currentStoryPage ? <Image src={`data:image/png;base64,${data.story[i].image}`} /> : null
+                        ))}
+                        <Text>{data.story[currentStoryPage].page_text}</Text>
+                        <div className="split">
+                        <Button onClick={() => {
+                            if (currentStoryPage === 0) return
+
+                            setCurrentStoryPage(currentStoryPage - 1)
+                        }} disabled={currentStoryPage === 0}>Back</Button>
+                        <Text>Page {currentStoryPage + 1} of {data.story.length}</Text>
+                        <Button onClick={() => {
+                            if (currentStoryPage === data?.story.length - 1) {
+                            setCurrentPage(currentPage + 1)
+                            } else {
+                            setCurrentStoryPage(currentStoryPage + 1)
+                            }
+                        }}>{currentStoryPage === data?.story.length - 1 ? "Quiz" : "Next"}</Button>
+                        </div>
+                    </>
+                    : null}
+                </div> : currentPage === 2 ?
+                    <div className="grid">
+                    <Text>{data ? data?.first_question : null}</Text>
+                    <Textarea
+                        placeholder="Answer here"
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                    />
+                    <Button onClick={onClickPt2} isLoading={isQuizDataLoading}>Grade</Button>
+                    </div> :
+                    <div className="grid">
+                    {quizData?.is_correct ? <CheckCircleIcon boxSize={14} color={'green'} /> : <CloseIcon color={'red'} />}
+                    {quizData?.image ? <Image src={quizData.image} /> : null}
+                    {quizData?.llm_response ? <Text>{quizData.llm_response}</Text> : null}
+                    </div>
+            }
+        </Box>
+        </div>
+    </>
   );
 }
 

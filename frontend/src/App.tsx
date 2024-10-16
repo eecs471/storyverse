@@ -1,4 +1,5 @@
 import Story from "./Story"
+import { Grammar } from "./Grammar"
 import { Login } from "./auth/Login"
 import { Signup } from "./auth/Signup"
 import { Profile } from "./auth/Profile"
@@ -10,6 +11,7 @@ function App() {
     <div className="App">
       <Routes>
         <Route path="/" element={<Story />} />
+        <Route path="/grammar" element={<Grammar />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/profile" element={<Profile />} />
