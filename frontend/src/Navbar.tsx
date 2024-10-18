@@ -5,6 +5,7 @@ import { Profile } from "./auth/Profile"
 import { Routes, Route } from 'react-router-dom';
 import { auth } from "./config/firebase"
 import { Link, useNavigate } from 'react-router-dom';
+import "./Navbar.css"
 
 export const Navbar = () => {
     const navigate = useNavigate();
