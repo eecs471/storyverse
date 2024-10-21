@@ -1,5 +1,5 @@
 import Story from "./Story"
-import { Grammar } from "./Grammar"
+import { Grammar } from "./grammar/Grammar"
 import { Login } from "./auth/Login"
 import { Signup } from "./auth/Signup"
 import { Profile } from "./auth/Profile"

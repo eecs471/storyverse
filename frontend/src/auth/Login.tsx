@@ -3,6 +3,7 @@ import {  signInWithEmailAndPassword } from 'firebase/auth';
 import { useState } from "react"
 import { Signup } from "./Signup"
 import { useNavigate } from 'react-router-dom';
+import { Button, Input } from '@chakra-ui/react'
 
 export const Login = () => {
     const navigate = useNavigate();
@@ -23,18 +24,18 @@ export const Login = () => {
     return (
         <div className="login" style={{display: 'flex', flexDirection: 'column'}}>
             <strong style={{fontSize: 20}}> Login </strong>
-            <input
+            <Input
                 placeholder="Email"
                 onChange={(e) => setEmail(e.target.value)}
             />
-            <input
+            <Input
                 placeholder="Password"
                 type="password"
                 onChange={(e) => setPassword(e.target.value)}
             />
-            <button onClick={signIn}> Sign In </button>
+            <Button onClick={signIn}> Sign In </Button>
 
-            <strong>Don't have an account? <button onClick={() => navigate("../signup")}> Sign Up </button></strong>
+            <strong>Don't have an account? <Button onClick={() => navigate("../signup")}> Sign Up </Button></strong>
         </div>
     )
 }

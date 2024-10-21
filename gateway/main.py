@@ -22,6 +22,7 @@ from langchain_community.utilities.dalle_image_generator import DallEAPIWrapper
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain_openai import OpenAI
+import grammar
 
 openai.api_key = os.environ['OPENAI_API_KEY']
 
@@ -248,6 +249,10 @@ async def quiz_response(request_body: QuizResponseRequestBody):
         "next_question": ""
     }
 
+@app.post("/grammar", response_model=grammar.GrammarQuiz)
+async def generate_grammar_quiz(request_body: grammar.GrammarQuizGenerateRequestBody):
+    quiz = grammar.generate_grammar_quiz(request_body.age, request_body.interests)
+    return quiz
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="localhost", port=8000, reload=True)

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from 'react-router-dom';
 import { getDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { Navbar } from "../Navbar"
+import { Button, Input } from '@chakra-ui/react'
 
 export const Profile = () => {
     const navigate = useNavigate();
@@ -111,43 +112,43 @@ export const Profile = () => {
                     <strong style={{fontSize: 20}}> {name}'s Profile </strong>
                     
                     <p>Current Name: {name}</p>
-                    <input
+                    <Input
                         placeholder="New Name"
                         value={newName}
                         onChange={(e) => setNewName(e.target.value)}
                     />
 
-                    <button onClick={changeName}> Update Name </button>
+                    <Button onClick={changeName}> Update Name </Button>
                 </div>
 
                 <div>
                     <p>Current Age: {age}</p>
-                    <input
+                    <Input
                         placeholder="New Age"
                         type="number"
                         value={newAge}
                         onChange={(e) => setNewAge(Number(e.target.value))}
                     />
-                    <button onClick={changeAge}> Update Age </button>
+                    <Button onClick={changeAge}> Update Age </Button>
                 </div>
 
                 <div className="interest">
-                    <input
+                    <Input
                         placeholder="Add Interest"
                         value={interest}
                         onChange={(e) => setInterest(e.target.value)}
                     />
-                    <button onClick={addInterest}> Add </button>
+                    <Button onClick={addInterest}> Add </Button>
                 </div>
 
                 {interests.length > 0 ? <strong>Interests:</strong> : <strong>No Interests Added</strong>}
 
                 {interests.map((interest) => (
-                    <p>{interest} <button onClick={() => removeInterest(interest)}> Remove </button></p>
+                    <p>{interest} <Button onClick={() => removeInterest(interest)}> Remove </Button></p>
                 ))}
 
-                <button onClick={deleteAccount}> Delete Account </button>
-                <button onClick={() => navigate("/")}> Go Back to Homepage </button>
+                <Button onClick={deleteAccount}> Delete Account </Button>
+                <Button onClick={() => navigate("/")}> Go Back to Homepage </Button>
             </div>
         </>
     )

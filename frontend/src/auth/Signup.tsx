@@ -1,6 +1,7 @@
 import { db, auth } from "../config/firebase"
 import {  createUserWithEmailAndPassword } from 'firebase/auth';
 import { getDocs, collection, addDoc, getDoc, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { Button, Input } from '@chakra-ui/react'
 
 import { useState } from "react"
 import { useNavigate } from 'react-router-dom';
@@ -42,44 +43,44 @@ export const Signup = () => {
         <div className="signup" style={{display: 'flex', flexDirection: 'column'}}>
             <strong style={{fontSize: 20}}> Sign Up </strong>
 
-            <input
+            <Input
                 placeholder="Email"
                 onChange={(e) => setEmail(e.target.value)}
             />
 
-            <input
+            <Input
                 placeholder="Password"
                 type="password"
                 onChange={(e) => setPassword(e.target.value)}
             />
 
-            <input
+            <Input
                 placeholder="Name"
                 onChange={(e) => setName(e.target.value)}
             />
 
-            <input
+            <Input
                 placeholder="Age"
                 type="number"
                 onChange={(e) => setAge(Number(e.target.value))}
             />
 
             <div className="interest">
-                <input
+                <Input
                     placeholder="Interest"
                     value={interest}
                     onChange={(e) => setInterest(e.target.value)}
                 />
-                <button onClick={() => {setInterests([...interests, interest]); setInterest("")}}> Add </button>
+                <Button onClick={() => {setInterests([...interests, interest]); setInterest("")}}> Add </Button>
             </div>
 
             {interests.length > 0 ? <strong>Interests:</strong> : <strong>No Interests Added</strong>}
 
             {interests.map((interest) => (
-                <p>{interest} <button onClick={() => removeInterest(interest)}> Remove </button></p>
+                <p>{interest} <Button onClick={() => removeInterest(interest)}> Remove </Button></p>
             ))}
 
-            <button onClick={signUp}> Sign Up </button>
+            <Button onClick={signUp}> Sign Up </Button>
         </div>
     )
 }
