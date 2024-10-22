@@ -82,7 +82,7 @@ def generate_grammar_quiz(age, interests):
         responseContent = responseContent[endQuestionIndex + 11:]
         questionNum += 1
     
-    return quiz
+    return {"quiz": quiz}
 
 
 

@@ -251,8 +251,7 @@ async def quiz_response(request_body: QuizResponseRequestBody):
 
 @app.post("/grammar", response_model=grammar.GrammarQuiz)
 async def generate_grammar_quiz(request_body: grammar.GrammarQuizGenerateRequestBody):
-    quiz = grammar.generate_grammar_quiz(request_body.age, request_body.interests)
-    return quiz
+    return grammar.generate_grammar_quiz(request_body.age, request_body.interests)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="localhost", port=8000, reload=True)

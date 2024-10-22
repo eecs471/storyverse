@@ -6,9 +6,11 @@ import React, { useState, useEffect } from 'react';
 import { Button, Input } from '@chakra-ui/react'
 import "./Grammar.css"
 import axios from "axios"
+import { GrammarQuiz, QuizQuestionList } from "./GrammarQuiz";
 
 export const Grammar = () => {
     const [userData, setUserData] = useState<any>(null);
+    const [quizContent, setQuizContent] = useState<QuizQuestionList>();
 
     const navigate = useNavigate();
     const backend_api = "http://localhost:8000";
@@ -41,6 +43,7 @@ export const Grammar = () => {
         const payload = {age: userData.age, interests: userData.interests};
         const response = await axios.post(backend_api + "/grammar", payload);
         const responseData = response.data;
+        setQuizContent(responseData);
     }
 
     return (
@@ -48,7 +51,9 @@ export const Grammar = () => {
             <Navbar />
             <div className="grammar-quiz">
                 <strong>Grammar Quiz</strong>
-                <Button onClick={generate}> Generate Grammar Quiz </Button>
+                <br />
+                <br />
+                {quizContent ? <GrammarQuiz quiz={quizContent.quiz} /> : <Button onClick={generate}> Generate Grammar Quiz </Button>}
             </div>
         </>
     )
