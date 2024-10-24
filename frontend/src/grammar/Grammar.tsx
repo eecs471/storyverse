@@ -53,7 +53,11 @@ export const Grammar = () => {
                 <strong>Grammar Quiz</strong>
                 <br />
                 <br />
-                {quizContent ? <GrammarQuiz quiz={quizContent.quiz} /> : <Button onClick={generate}> Generate Grammar Quiz </Button>}
+                {quizContent ? 
+                <div className="quiz">
+                    <GrammarQuiz quiz={quizContent.quiz} correctAnswers={quizContent.correctAnswers}/> 
+                </div>
+                : <Button onClick={generate}> Generate Grammar Quiz </Button>}
             </div>
         </>
     )

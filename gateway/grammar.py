@@ -22,6 +22,7 @@ from langchain_community.utilities.dalle_image_generator import DallEAPIWrapper
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain_openai import OpenAI
+from langchain.schema import SystemMessage, HumanMessage
 
 openai.api_key = os.environ['OPENAI_API_KEY']
 
@@ -44,10 +45,11 @@ def generate_grammar_quiz(age, interests):
     prompt = ChatPromptTemplate.from_template(template)
     prompt = prompt.format_messages(age=age, interests=interests)
 
-    response = chat(prompt)
+    response = chat.invoke(prompt)
     responseContent = response.content
 
     quiz = []
+    correctAnswers = []
     questionNum = 1
     while True:
         question = {}
@@ -60,21 +62,27 @@ def generate_grammar_quiz(age, interests):
         startQuestionIndex = responseContent.find(str(questionNum))
         questionContent = responseContent[startQuestionIndex: endQuestionIndex + 11]
 
-        # Separate question content into components (question, answer choices, etc...)
-        questionComponents  = questionContent.splitlines()
-
-        # Get question text from question components
-        questionText = '\n'.join(questionComponents[0:2])
+        # Get question text from question content
+        endQuestionTextIndex = questionContent.find("a)")
+        questionText = questionContent[:endQuestionTextIndex]
         question["question"] = questionText
-        questionComponents = questionComponents[2:]
+
+        # Separate rest of question content into components (answer choices, correct answer, etc...)
+        questionContent = questionContent[endQuestionTextIndex:]
+        questionComponents  = questionContent.splitlines()
 
         # Get correct answer from question components
         answer = questionComponents[-1][8]
-        question["correctAnswer"] = answer
+        correctAnswers.append(ord(answer) - 97) # convert to number between 0-3
         questionComponents = questionComponents[:-1]
 
         # Get answer choices for question (answer choices are all thats left)
         answerChoices = questionComponents
+
+        # Get rid of empty answer choices caused by splitlines
+        while answerChoices[-1] == '':
+            answerChoices.pop()
+
         question["answerChoices"] = answerChoices
         quiz.append(question)
 
@@ -82,10 +90,7 @@ def generate_grammar_quiz(age, interests):
         responseContent = responseContent[endQuestionIndex + 11:]
         questionNum += 1
     
-    return {"quiz": quiz}
-
-
-
+    return {"quiz": quiz, "correctAnswers": correctAnswers}
 
 class GrammarQuizGenerateRequestBody(BaseModel):
     age: int
@@ -94,7 +99,37 @@ class GrammarQuizGenerateRequestBody(BaseModel):
 class GrammarQuestion(BaseModel):
     question: str
     answerChoices: list[str]
-    correctAnswer: str
 
 class GrammarQuiz(BaseModel):
     quiz: list[GrammarQuestion]
+    correctAnswers: list[int]
+
+
+
+def handle_chat(userPrompt, quiz, userAnswers, correctAnswers):
+    teacherContextTemplate = """You are a teacher who is answering questions a student has about a quiz they just took. \
+        They may have questions regarding the quiz questions or general topics the quiz covers. \
+        Here are the questions and answer choices for each question: {quiz} \
+        Here are the correct answers for the quiz {correctAnswers} \
+        Here are the answers selected by the student {userAnswers} \
+        For the correct answers and user answers 0 corresponds to option a, 1 to option b, 2 to option c, and 3 to option d
+    """
+    teacherContext = ChatPromptTemplate.from_template(teacherContextTemplate)
+    teacherContext = teacherContext.format_messages(quiz=quiz, correctAnswers=correctAnswers, userAnswers=userAnswers)
+    
+    messages = [
+        SystemMessage(content=teacherContext[0].content),
+        HumanMessage(content=userPrompt),
+    ]
+
+    response = chat.invoke(messages)
+    responseContent = response.content
+    
+    responseContent = responseContent.replace('\n', '<br/>')
+    return responseContent
+
+class GrammarChatRequestBody(BaseModel):
+    userPrompt: str
+    quiz: list[GrammarQuestion]
+    userAnswers: list[int]
+    correctAnswers: list[int]

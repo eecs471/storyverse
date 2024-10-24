@@ -253,5 +253,9 @@ async def quiz_response(request_body: QuizResponseRequestBody):
 async def generate_grammar_quiz(request_body: grammar.GrammarQuizGenerateRequestBody):
     return grammar.generate_grammar_quiz(request_body.age, request_body.interests)
 
+@app.post("/grammarchatapi")
+async def handle_grammar_quiz_chat(request_body: grammar.GrammarChatRequestBody):
+    return grammar.handle_chat(request_body.userPrompt, request_body.quiz, request_body.userAnswers, request_body)
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host="localhost", port=8000, reload=True)
