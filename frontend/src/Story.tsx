@@ -64,14 +64,33 @@ function Story() {
             {
             currentPage === 0 ?
                 <div className="grid">
-                <Text as='b' fontSize='2xl'>
-                    Welcome to the Storyverse!
+                <Text className="title" as='b' fontSize='3xl'>
+                  Welcome to Storyverse!
                 </Text>
-                <Image src={Storyverse} />
-                <Input placeholder={"Input your age"} value={currentAge} onChange={(e) => setCurrentAge(e.target.value)} />
+                <Image className="App-logo" src={Storyverse} />
+                <Input 
+                  borderColor="gray.500" 
+                  borderRadius="md" 
+                  focusBorderColor="blue.500"
+                  placeholder={"Input your age"} 
+                  value={currentAge} 
+                  sx={{
+                    '&::placeholder': {
+                      color: 'black', 
+                    },
+                  }}
+                  onChange={(e) => setCurrentAge(e.target.value)} />
                 <Textarea
+                    borderColor="gray.500" 
+                    borderRadius="md" 
+                    focusBorderColor="blue.500"
                     placeholder="Talk about the story you want to read"
                     value={prompt}
+                    sx={{
+                      '&::placeholder': {
+                        color: 'black', 
+                      },
+                    }}
                     onChange={(e) => setPrompt(e.target.value)}
                 />
                 <Button onClick={onClickPt1} isLoading={isLoading}>Generate</Button>
