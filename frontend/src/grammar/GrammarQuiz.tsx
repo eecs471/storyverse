@@ -1,8 +1,8 @@
 import React, { ReactNode } from "react";
 import { GrammarQuizQuestion, QuizQuestion } from "./GrammarQuizQuestion"
 import { Button, Input } from '@chakra-ui/react'
-import { useState, useEffect } from 'react'
-import { AiChat, useAsBatchAdapter, ChatAdapterExtras } from '@nlux/react';
+import { useState, useEffect, useRef } from 'react'
+import { AiChat, useAsBatchAdapter, ChatAdapterExtras, ChatItem } from '@nlux/react';
 import '@nlux/themes/nova.css'
 
 export interface QuizQuestionList {
@@ -14,6 +14,7 @@ export const GrammarQuiz: React.FC<QuizQuestionList> = ({quiz, correctAnswers}) 
     const [answerSelections, setAnswerSelections] = useState<number[]>(new Array(quiz.length).fill(-1));
     const [score, setScore] = useState<number>(-1);
     const [graded, setGraded] = useState<boolean>(false);
+    const [chatHistory, setChatHistory] = useState<string[]>([""]);
 
     const gptAdapter = useAsBatchAdapter(
         async (message: string, extras: ChatAdapterExtras): Promise<string> => {
@@ -31,10 +32,13 @@ export const GrammarQuiz: React.FC<QuizQuestionList> = ({quiz, correctAnswers}) 
                         userPrompt: message, 
                         quiz: quizPayload,
                         userAnswers: answerSelections,
-                        correctAnswers: correctAnswers
+                        correctAnswers: correctAnswers,
+                        history: chatHistory
                         })
                 })
-                return await response.text()
+                const textResponse = await response.text();
+                setChatHistory([...chatHistory, message, textResponse])
+                return textResponse;
             } catch (err) {
                 console.error(err);
                 return "Grammar Chat Api Failure";

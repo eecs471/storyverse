@@ -1,6 +1,7 @@
 import os
 import openai
 from fastapi import FastAPI
+from fastapi import Response
 from pydantic import BaseModel
 from typing import List
 from enum import Enum
@@ -255,7 +256,8 @@ async def generate_grammar_quiz(request_body: grammar.GrammarQuizGenerateRequest
 
 @app.post("/grammarchatapi")
 async def handle_grammar_quiz_chat(request_body: grammar.GrammarChatRequestBody):
-    return grammar.handle_chat(request_body.userPrompt, request_body.quiz, request_body.userAnswers, request_body)
+    response_content = grammar.handle_chat(request_body.userPrompt, request_body.quiz, request_body.userAnswers, request_body.history)
+    return Response(content=response_content, media_type="text/plain")
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="localhost", port=8000, reload=True)

@@ -22,7 +22,7 @@ from langchain_community.utilities.dalle_image_generator import DallEAPIWrapper
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain_openai import OpenAI
-from langchain.schema import SystemMessage, HumanMessage
+from langchain.schema import SystemMessage, HumanMessage, AIMessage
 
 openai.api_key = os.environ['OPENAI_API_KEY']
 
@@ -106,7 +106,7 @@ class GrammarQuiz(BaseModel):
 
 
 
-def handle_chat(userPrompt, quiz, userAnswers, correctAnswers):
+def handle_chat(userPrompt, quiz, userAnswers, correctAnswers, history):
     teacherContextTemplate = """You are a teacher who is answering questions a student has about a quiz they just took. \
         They may have questions regarding the quiz questions or general topics the quiz covers. \
         Here are the questions and answer choices for each question: {quiz} \
@@ -117,15 +117,16 @@ def handle_chat(userPrompt, quiz, userAnswers, correctAnswers):
     teacherContext = ChatPromptTemplate.from_template(teacherContextTemplate)
     teacherContext = teacherContext.format_messages(quiz=quiz, correctAnswers=correctAnswers, userAnswers=userAnswers)
     
-    messages = [
-        SystemMessage(content=teacherContext[0].content),
-        HumanMessage(content=userPrompt),
-    ]
+    messages = [SystemMessage(content=teacherContext[0].content)]
+
+    for i in range(len(history) - 1):
+        messages.append(HumanMessage(content=history[i]))
+        messages.append(AIMessage(content=history[i + 1]))
+    messages.append(HumanMessage(content=userPrompt))
 
     response = chat.invoke(messages)
     responseContent = response.content
     
-    responseContent = responseContent.replace('\n', '<br/>')
     return responseContent
 
 class GrammarChatRequestBody(BaseModel):
@@ -133,3 +134,4 @@ class GrammarChatRequestBody(BaseModel):
     quiz: list[GrammarQuestion]
     userAnswers: list[int]
     correctAnswers: list[int]
+    history: list[str]
