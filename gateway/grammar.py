@@ -30,7 +30,7 @@ chat_llm_model = "gpt-3.5-turbo"
 chat = ChatOpenAI(temperature=0.0, model=chat_llm_model)
 
 def generate_grammar_quiz(age, interests):
-    template = """Make a multiple choice grammar quiz for {age} year olds. \
+    template = """Make a 10 question multiple choice grammar quiz with a difficulty level tailored towards {age} year olds. \
         Incorporate these interests to make the questions more engaging: {interests}. \
         Use this as a template for how the questions should be formatted: \
         1. Which Word is a Conjunction? \

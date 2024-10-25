@@ -14,14 +14,14 @@ export const GrammarQuiz: React.FC<QuizQuestionList> = ({quiz, correctAnswers}) 
     const [answerSelections, setAnswerSelections] = useState<number[]>(new Array(quiz.length).fill(-1));
     const [score, setScore] = useState<number>(-1);
     const [graded, setGraded] = useState<boolean>(false);
-    const [chatHistory, setChatHistory] = useState<string[]>([""]);
+    const chatHistoryRef = useRef<string[]>([]);
 
     const gptAdapter = useAsBatchAdapter(
         async (message: string, extras: ChatAdapterExtras): Promise<string> => {
             const quizPayload = quiz.map((quizQuestion) => {
                 return {question: quizQuestion.question, answerChoices: quizQuestion.answerChoices}
             });
-
+            
             try {
                 const response = await fetch('http://localhost:8000/grammarchatapi', {
                     method: 'POST',
@@ -33,12 +33,13 @@ export const GrammarQuiz: React.FC<QuizQuestionList> = ({quiz, correctAnswers}) 
                         quiz: quizPayload,
                         userAnswers: answerSelections,
                         correctAnswers: correctAnswers,
-                        history: chatHistory
-                        })
-                })
+                        history: chatHistoryRef.current,
+                    }),
+                });
                 const textResponse = await response.text();
-                setChatHistory([...chatHistory, message, textResponse])
+                chatHistoryRef.current = [...chatHistoryRef.current, message, textResponse]
                 return textResponse;
+
             } catch (err) {
                 console.error(err);
                 return "Grammar Chat Api Failure";

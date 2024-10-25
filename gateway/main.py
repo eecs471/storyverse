@@ -256,7 +256,7 @@ async def generate_grammar_quiz(request_body: grammar.GrammarQuizGenerateRequest
 
 @app.post("/grammarchatapi")
 async def handle_grammar_quiz_chat(request_body: grammar.GrammarChatRequestBody):
-    response_content = grammar.handle_chat(request_body.userPrompt, request_body.quiz, request_body.userAnswers, request_body.history)
+    response_content = grammar.handle_chat(request_body.userPrompt, request_body.quiz, request_body.userAnswers, request_body.correctAnswers, request_body.history)
     return Response(content=response_content, media_type="text/plain")
 
 if __name__ == "__main__":
