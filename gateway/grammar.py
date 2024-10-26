@@ -30,7 +30,7 @@ chat_llm_model = "gpt-3.5-turbo"
 chat = ChatOpenAI(temperature=0.0, model=chat_llm_model)
 
 def generate_grammar_quiz(age, interests):
-    template = """Make a 10 question multiple choice grammar quiz with a difficulty level tailored towards {age} year olds. \
+    template = """Make a 5 question multiple choice grammar quiz with a difficulty level tailored towards {age} year olds. \
         Incorporate these interests to make the questions more engaging: {interests}. \
         Use this as a template for how the questions should be formatted: \
         1. Which Word is a Conjunction? \
@@ -39,7 +39,8 @@ def generate_grammar_quiz(age, interests):
         b) but \
         c) started \
         d) rain \
-        Answer: b) but
+        Answer: b) but \
+        Make sure to include Answer: for each question
     """
 
     prompt = ChatPromptTemplate.from_template(template)
@@ -70,6 +71,7 @@ def generate_grammar_quiz(age, interests):
         # Separate rest of question content into components (answer choices, correct answer, etc...)
         questionContent = questionContent[endQuestionTextIndex:]
         questionComponents  = questionContent.splitlines()
+        questionComponents = [component.lstrip() for component in questionComponents]
 
         # Get correct answer from question components
         answer = questionComponents[-1][8]
