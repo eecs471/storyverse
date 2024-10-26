@@ -27,7 +27,7 @@ import grammar
 
 openai.api_key = os.environ['OPENAI_API_KEY']
 
-chat_llm_model = "gpt-3.5-turbo"
+chat_llm_model = "gpt-4"
 chat = ChatOpenAI(temperature=0.0, model=chat_llm_model)
 
 image_llm = OpenAI(temperature=0.9)
@@ -58,19 +58,35 @@ def create_story_v1(outline, age):
     return story
 
 def create_story(outline, age):
-    template_string = """Generate a story for a {age} year old girl \
-        which consists of three paragraphs with each paragraph four sentences long. \
-        The story should be about the following: ```{outline}``` \
-        In the story, there should be a dramatic situation and a happy ending. \
-        After the story, generate a question to check the comprehension of the story. \
-        Response MUST be in json format with each key and value being paragraph number \
-        and text of each paragraph being its value, and for the key "question" have the generated question as value.
+    # template_string = """Generate a story for a {age} year old girl \
+    #     which consists of three paragraphs with each paragraph four sentences long. \
+    #     The story should be about the following: ```{outline}``` \
+    #     In the story, there should be a dramatic situation and a happy ending. \
+    #     After the story, generate a question to check the comprehension of the story. \
+    #     Response MUST be in json format with each key and value being paragraph number \
+    #     and text of each paragraph being its value, and for the key "question" have the generated question as value.
+    # """
+    
+    agent_role = """You are a Story Generating Assistant. Your task is to identify and enhance a real story that is suitable for a child of the specified age and closely matches the given outline/instructions. The story can be from any genre (fiction, non-fiction, historical, etc.), but it must be based on real events, characters, themes, or settings. Maintain the core elements of the original story and try to change the story as least as possible while following the outline and instructions provided. Do not hallucinate"""
+    template_string = """ 
+    {agent_role}. Generate an engaging story for a {age}-year-old child that consists of three sections. 
+    The story should be written in simple, age-appropriate language and should align with the following topic or outline: ```{outline}```. 
+    Make sure the story is easy to follow and enjoyable for a child of this age. After the story, generate a question to check the child's comprehension of the story.
+
+    The response must be in **JSON format** as follows:
+    - The key for each section will be the paragraph number (e.g., "paragraph1", "paragraph2", "paragraph3").
+    - In the first paragraph, include in quotations the source story or historical event used to generate the response (e.g. "humpty dumpty", "the life of alan turing") followed by the actual story.
+    - Each value will be the corresponding paragraph text.
+    - Include a key called "question" with the comprehension question as its value.
+
+    Ensure that the story is coherent, follows the outline, and is appropriate for the child's age.
     """
 
     prompt_template = ChatPromptTemplate.from_template(template_string)
 
     #prompt_template.messages[0].prompt
     story_prompt = prompt_template.format_messages(
+                    agent_role=agent_role,
                     age=age,
                     outline=outline)
     story_response = chat(story_prompt)
