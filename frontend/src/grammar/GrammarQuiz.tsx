@@ -4,6 +4,9 @@ import { Button, Input } from '@chakra-ui/react'
 import { useState, useEffect, useRef } from 'react'
 import { AiChat, useAsBatchAdapter, ChatAdapterExtras, ChatItem } from '@nlux/react';
 import '@nlux/themes/nova.css'
+import { getDoc, doc, deleteDoc, updateDoc,arrayUnion } from 'firebase/firestore';
+import { auth, db } from "../config/firebase"
+
 
 export interface QuizQuestionList {
     quiz: QuizQuestion[];
@@ -47,7 +50,7 @@ export const GrammarQuiz: React.FC<QuizQuestionList> = ({quiz, correctAnswers}) 
         }
     );
 
-    const submitQuiz = () => {
+    const submitQuiz = async() => {
         const allQuestionsAnswered = !answerSelections.includes(-1);
 
         if (allQuestionsAnswered) {
@@ -59,6 +62,29 @@ export const GrammarQuiz: React.FC<QuizQuestionList> = ({quiz, correctAnswers}) 
             }
             const percentCorrect = (numCorrect / answerSelections.length) * 100;
             setScore(percentCorrect);
+            const quizResult = {
+                timestamp: new Date().toISOString(), // 提交时间
+                percentCorrect, // 正确率
+                questions: quiz.map((q, index) => ({
+                    question: q.question, // 每个问题的文本
+                    answerChoices: q.answerChoices,
+                    correctAnswer: correctAnswers[index], // 每个问题的正确答案
+                    userAnswer: answerSelections[index], // 用户提交的答案
+                })),
+            };
+    
+            // 保存到 Firestore
+            try {
+                const userDbRef = doc(db, "users", auth.currentUser?.email as string);
+    
+                await updateDoc(userDbRef, {
+                    grammarquizResults: arrayUnion(quizResult), // 添加结果到 grammarquizResults 数组
+                });
+    
+                console.log("Quiz results saved successfully!");
+            } catch (err) {
+                console.error("Error saving quiz results:", err);
+            }
             setGraded(true);
         } else {
             alert("Please Select an Answer Choice for all Questions!");
@@ -94,6 +120,7 @@ export const GrammarQuiz: React.FC<QuizQuestionList> = ({quiz, correctAnswers}) 
                 />
             </>
             : <Button onClick={submitQuiz}> Submit </Button>}
+
         </>
     )
 }
