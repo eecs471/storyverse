@@ -30,7 +30,7 @@ openai.api_key = os.environ['OPENAI_API_KEY']
 chat_llm_model = "gpt-4"
 chat = ChatOpenAI(temperature=0.0, model=chat_llm_model)
 
-image_llm = OpenAI(temperature=0.9)
+image_llm = OpenAI(temperature=0.0)
 
 together_ai = 'https://api.together.xyz/inference'
 
@@ -75,7 +75,6 @@ def create_story(outline, age):
 
     The response must be in **JSON format** as follows:
     - The key for each section will be the paragraph number (e.g., "paragraph1", "paragraph2", "paragraph3").
-    - In the first paragraph, include in quotations the source story or historical event used to generate the response (e.g. "humpty dumpty", "the life of alan turing") followed by the actual story.
     - Each value will be the corresponding paragraph text.
     - Include a key called "question" with the comprehension question as its value.
 
@@ -144,7 +143,7 @@ def generate_image_descriptions(story, age):
 def _generate_image(image_description, age):
     prompt = PromptTemplate(
         input_variables=["image_description"],
-        template="""Generate the image so that it is in the style of a story book fit for 4 year old children. \
+        template="""Generate the image so that it is in the style of a rendered in a detailed, animated, CGI-inspired style \
             The following is a description of a scene: {image_description}.
         """
     )
@@ -155,9 +154,17 @@ def _generate_image(image_description, age):
     
     return image_url
 
+    # template="""Generate an image in the high-quality, 3D-rendered style of Pixar films. \
+    #    The following is a description of the scene that you MUST include all details of it: {0}.
+
+    # template="""Generate an image in the high-quality, 3D-rendered style of comic books. \
+    #    The following is a description of the scene that you MUST include all details of it: {0}.
+
+    # template="""Generate an image in the high-quality, 3D-rendered style of a picture book. \
+    #    The following is a description of the scene that you MUST include all details of it: {0}.
 def _generate_image_stable_diff(image_desc):
-    template="""Generate the image so that it is in the style of a story book fit for 4 year old children. \
-        The following is a description of a scene: {0}.
+    template="""Generate an image in the high-quality, 3D-rendered style of a picture book. \
+       The following is a description of the scene that you MUST include all details of it: {0}.
     """.format(image_desc)
 
     client = Together(api_key=os.environ.get('TOGETHER_API_KEY'))
@@ -232,8 +239,6 @@ async def generate(request_body: StoryGenerateRequestBody):
     print(descriptions)
     images = generate_images(descriptions, request_body.age)
     #import pdb; pdb.set_trace()
-    print("IMAGES")
-    print(images)
 
     return_val = {"story": [], "first_question": story["question"]}
 
