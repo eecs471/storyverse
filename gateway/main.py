@@ -156,6 +156,7 @@ def _generate_image(image_description, age):
 
     
 def _generate_image_stable_diff(image_desc, artStyle):
+    print(artStyle)
     template = ""
     if artStyle == 'picture book':
         template="""Generate an image in the high-quality, style of a picture book. \
@@ -173,6 +174,9 @@ def _generate_image_stable_diff(image_desc, artStyle):
         template="""Generate an image in the art style of cubism while still following the description. \
         The following is a description of the scene that you MUST include all details of it: {0}.
         """.format(image_desc)
+    else:
+        print("art style invalid")
+    print(template)
 
     client = Together(api_key=os.environ.get('TOGETHER_API_KEY'))
     response = client.images.generate(
@@ -247,9 +251,9 @@ async def generate(request_body: StoryGenerateRequestBody):
     print("DESCRIPTIONS")
     print(descriptions)
     print("ART STYLE")
-    # artStyle = request_body.artStyle
+    artStyle = request_body.artStyle
     print(request_body)
-    images = generate_images(descriptions, request_body.age, 'artStyle')
+    images = generate_images(descriptions, request_body.age, artStyle)
     #import pdb; pdb.set_trace()
 
     return_val = {"story": [], "first_question": story["question"]}

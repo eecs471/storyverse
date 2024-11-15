@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Story.css';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { QUIZ_RESPONSE_SCHEMA, STORY_RESPONSE_SCHEMA, fetchQuizResponse, fetchStory } from './constants';
 import { Textarea, Button, Box, Input } from '@chakra-ui/react'
 import { Image } from '@chakra-ui/react'
@@ -21,7 +21,7 @@ import { Select } from '@chakra-ui/react';
 function Story() {
   // For navigating between different components
   const navigate = useNavigate();
-
+  const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(0)
   const [currentStoryPage, setCurrentStoryPage] = useState(0)
   const [currentAge, setCurrentAge] = useState('')
@@ -58,6 +58,17 @@ function Story() {
     setCurrentPage(currentPage + 1)
   }
 
+  const onClickPt3 = async () => {
+    setCurrentPage(0)
+    setCurrentAge('')
+    setPrompt('')
+    setAnswer('')
+    setCurrentStoryPage(0)
+    setArtStyle('picture book');
+    queryClient.resetQueries({ 'queryKey': ['generate'] });
+    queryClient.resetQueries({ 'queryKey': ['response'] });
+  }
+
   return (
     <>
       <Navbar />
@@ -71,6 +82,9 @@ function Story() {
                 </Text>
                 <Image className="App-logo" src={Storyverse} />
                 <Select
+                  borderColor="gray.500"
+                  borderRadius="md"
+                  focusBorderColor="blue.500"
                   placeholder="Select art style"
                   value={artStyle}
                   onChange={(e) => setArtStyle(e.target.value)}
@@ -137,6 +151,9 @@ function Story() {
                     <Text>{data ? data?.first_question : null}</Text>
                     <Textarea
                       placeholder="Answer here"
+                      borderColor="gray.500"
+                      borderRadius="md"
+                      focusBorderColor="blue.500"
                       value={answer}
                       onChange={(e) => setAnswer(e.target.value)}
                     />
@@ -146,6 +163,7 @@ function Story() {
                     {quizData?.is_correct ? <CheckCircleIcon boxSize={14} color={'green'} /> : <CloseIcon color={'red'} />}
                     {quizData?.image ? <Image src={quizData.image} /> : null}
                     {quizData?.llm_response ? <Text>{quizData.llm_response}</Text> : null}
+                    <Button onClick={onClickPt3} isLoading={isQuizDataLoading}>Finish</Button>
                   </div>
           }
         </Box>
