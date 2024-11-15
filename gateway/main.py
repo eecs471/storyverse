@@ -273,7 +273,16 @@ async def quiz_response(request_body: QuizResponseRequestBody):
 
 @app.post("/grammar", response_model=grammar.GrammarQuiz)
 async def generate_grammar_quiz(request_body: grammar.GrammarQuizGenerateRequestBody):
-    return grammar.generate_grammar_quiz(request_body.age, request_body.interests)
+    quiz_content = grammar.generate_grammar_quiz(request_body.age, request_body.interests)
+    
+    for i in range(len(quiz_content["quiz"])):
+        question = quiz_content["quiz"][i]
+        question_text = question['question']
+        answer_choices = "\n".join(question["answerChoices"])
+        image_desc = question_text + answer_choices
+        question["image"] = grammar.generate_image_grammar_quiz_stable_diff(image_desc)
+    
+    return quiz_content
 
 @app.post("/grammarchatapi")
 async def handle_grammar_quiz_chat(request_body: grammar.GrammarChatRequestBody):

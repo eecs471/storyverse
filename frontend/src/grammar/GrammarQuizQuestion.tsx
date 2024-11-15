@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react"
-import { Button, Input } from '@chakra-ui/react'
+import { Button, Input, Image } from '@chakra-ui/react'
 
 export interface QuizQuestion {
     questionIndex: number;
@@ -10,9 +10,10 @@ export interface QuizQuestion {
     setAnswerSelections: React.Dispatch<React.SetStateAction<number[]>>;
     correctAnswer: number;
     graded: boolean;
+    image: string;
 }
 
-export const GrammarQuizQuestion: React.FC<QuizQuestion> = ({questionIndex, question, answerChoices,  selectedAnswer, setAnswerSelections, correctAnswer, graded}) => {
+export const GrammarQuizQuestion: React.FC<QuizQuestion> = ({questionIndex, question, answerChoices,  selectedAnswer, setAnswerSelections, correctAnswer, graded, image}) => {
     
     const changeAnswer = (index: number) => {
         setAnswerSelections((prevAnswers) => {
@@ -27,6 +28,9 @@ export const GrammarQuizQuestion: React.FC<QuizQuestion> = ({questionIndex, ques
             
             {graded && selectedAnswer === correctAnswer && <span className="correct">✔️</span>}
             {graded && selectedAnswer !== correctAnswer && <span className="incorrect">❌</span>}
+            <div className="image">
+                <Image src={`data:image/png;base64,${image}`} alt={"Image Loading Failed"} />
+            </div>
             <strong>{question}</strong>
             {answerChoices.map((answerChoice, index) => (
                 <div className="multiple-choice-option">
