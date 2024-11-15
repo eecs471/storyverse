@@ -23,6 +23,8 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain_openai import OpenAI
 from langchain.schema import SystemMessage, HumanMessage, AIMessage
+import cv2
+import numpy as np
 
 openai.api_key = os.environ['OPENAI_API_KEY']
 
@@ -94,6 +96,42 @@ def generate_grammar_quiz(age, interests):
     
     return {"quiz": quiz, "correctAnswers": correctAnswers}
 
+def generate_images_grammar_quiz_stable_diff(interests, num):
+    interests = ", ".join(interests)
+    template="""Generate engaging, funny images for a young student about {interests}
+    """.format(interests=interests)
+
+    images = []
+    while len(images) < num:
+        images_to_generate_this_cycle = min(4, num - len(images))
+        client = Together(api_key=os.environ.get('TOGETHER_API_KEY'))
+        response = client.images.generate(
+            model="stabilityai/stable-diffusion-xl-base-1.0",
+            prompt=template,
+            width=1024,
+            height=1024,
+            steps=25,
+            n=images_to_generate_this_cycle
+        )
+        response_data = response.data
+
+        for img in response_data:
+            image_url = img.url
+            response = requests.get(image_url)
+            if response.status_code == 200:
+                image_data = response.content
+                np_image_array = np.frombuffer(image_data, np.uint8)
+                
+                image_data = cv2.imdecode(np_image_array, cv2.IMREAD_UNCHANGED)   
+                image_data = cv2.resize(image_data, (512, 512), interpolation=cv2.INTER_LANCZOS4)
+        
+                success, image_data = cv2.imencode('.png', image_data)
+                images.append(base64.b64encode(image_data).decode('utf-8'))
+            else:
+                images.append("")
+        
+    return images
+
 class GrammarQuizGenerateRequestBody(BaseModel):
     age: int
     interests: list[str]
@@ -101,6 +139,7 @@ class GrammarQuizGenerateRequestBody(BaseModel):
 class GrammarQuestion(BaseModel):
     question: str
     answerChoices: list[str]
+    image: str
 
 class GrammarQuiz(BaseModel):
     quiz: list[GrammarQuestion]

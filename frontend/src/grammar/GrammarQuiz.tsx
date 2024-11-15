@@ -103,6 +103,7 @@ export const GrammarQuiz: React.FC<QuizQuestionList> = ({quiz, correctAnswers}) 
                     setAnswerSelections={setAnswerSelections} 
                     correctAnswer={correctAnswers[index]}
                     graded={graded}
+                    image={quizQuestion.image}
                 />
             ))}
             {graded 

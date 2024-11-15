@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Story.css';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { QUIZ_RESPONSE_SCHEMA, STORY_RESPONSE_SCHEMA, fetchQuizResponse, fetchStory } from './constants';
 import { Textarea, Button, Box, Input } from '@chakra-ui/react'
 import { Image } from '@chakra-ui/react'
@@ -16,25 +16,27 @@ import { signOut } from "firebase/auth"
 import { Navbar } from "./Navbar"
 import Storyverse from './storyverse.png'
 import _ from 'lodash';
-
+import { Select } from '@chakra-ui/react';
 
 function Story() {
   // For navigating between different components
   const navigate = useNavigate();
-
+  const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(0)
   const [currentStoryPage, setCurrentStoryPage] = useState(0)
   const [currentAge, setCurrentAge] = useState('')
   const [prompt, setPrompt] = useState('')
+  const [answer, setAnswer] = useState('')
+  const [artStyle, setArtStyle] = useState('picture book');
   const { data, isLoading, refetch } = useQuery<STORY_RESPONSE_SCHEMA>({
     queryKey: ['generate'],
-    queryFn: () => fetchStory(currentAge, prompt),
+    queryFn: () => fetchStory(currentAge, prompt, artStyle),
     refetchOnWindowFocus: false,
     enabled: false
   })
   const { data: quizData, isLoading: isQuizDataLoading, refetch: refetchQuizResponse } = useQuery<QUIZ_RESPONSE_SCHEMA>({
     queryKey: ['response'],
-    queryFn: () => fetchQuizResponse(prompt),
+    queryFn: () => fetchQuizResponse(answer),
     refetchOnWindowFocus: false,
     enabled: false
   })
@@ -42,7 +44,7 @@ function Story() {
   useEffect(() => {
     // Ensure user is logged in before rendering
     if (!auth.currentUser) {
-        navigate('/login');
+      navigate('/login');
     }
   }, []);
 
@@ -56,88 +58,116 @@ function Story() {
     setCurrentPage(currentPage + 1)
   }
 
+  const onClickPt3 = async () => {
+    setCurrentPage(0)
+    setCurrentAge('')
+    setPrompt('')
+    setAnswer('')
+    setCurrentStoryPage(0)
+    setArtStyle('picture book');
+    queryClient.resetQueries({ 'queryKey': ['generate'] });
+    queryClient.resetQueries({ 'queryKey': ['response'] });
+  }
+
   return (
     <>
-        <Navbar />
-        <div className="Story">
+      <Navbar />
+      <div className="Story">
         <Box boxSize='sm'>
-            {
+          {
             currentPage === 0 ?
-                <div className="grid">
+              <div className="grid">
                 <Text className="title" as='b' fontSize='3xl'>
                   Welcome to Storyverse!
                 </Text>
                 <Image className="App-logo" src={Storyverse} />
-                <Input 
-                  borderColor="gray.500" 
-                  borderRadius="md" 
+                <Select
+                  borderColor="gray.500"
+                  borderRadius="md"
                   focusBorderColor="blue.500"
-                  placeholder={"Input your age"} 
-                  value={currentAge} 
+                  placeholder="Select art style"
+                  value={artStyle}
+                  onChange={(e) => setArtStyle(e.target.value)}
+                >
+                  <option value="picture book">Picture Book</option>
+                  <option value="comic">Comic</option>
+                  <option value="pixar">Pixar</option>
+                  <option value="abstract">Abstract</option>
+                </Select>
+                <Input
+                  borderColor="gray.500"
+                  borderRadius="md"
+                  focusBorderColor="blue.500"
+                  placeholder={"Input your age"}
+                  value={currentAge}
                   sx={{
                     '&::placeholder': {
-                      color: 'black', 
+                      color: 'black',
                     },
                   }}
                   onChange={(e) => setCurrentAge(e.target.value)} />
                 <Textarea
-                    borderColor="gray.500" 
-                    borderRadius="md" 
-                    focusBorderColor="blue.500"
-                    placeholder="Talk about the story you want to read"
-                    value={prompt}
-                    sx={{
-                      '&::placeholder': {
-                        color: 'black', 
-                      },
-                    }}
-                    onChange={(e) => setPrompt(e.target.value)}
+                  borderColor="gray.500"
+                  borderRadius="md"
+                  focusBorderColor="blue.500"
+                  placeholder="Talk about the story you want to read"
+                  value={prompt}
+                  sx={{
+                    '&::placeholder': {
+                      color: 'black',
+                    },
+                  }}
+                  onChange={(e) => setPrompt(e.target.value)}
                 />
                 <Button onClick={onClickPt1} isLoading={isLoading}>Generate</Button>
-                </div> :
-                currentPage === 1 ?
+              </div> :
+              currentPage === 1 ?
                 <div className="grid">
-                    {data && data?.story.length > 0 ?
+                  {data && data?.story.length > 0 ?
                     <>
-                        {_.map(data.story, (x, i) => (
+                      {_.map(data.story, (x, i) => (
                         i === currentStoryPage ? <Image src={`data:image/png;base64,${data.story[i].image}`} /> : null
-                        ))}
-                        <Text>{data.story[currentStoryPage].page_text}</Text>
-                        <div className="split">
+                      ))}
+                      <Text>{data.story[currentStoryPage].page_text}</Text>
+                      <div className="split">
                         <Button onClick={() => {
-                            if (currentStoryPage === 0) return
+                          if (currentStoryPage === 0) return
 
-                            setCurrentStoryPage(currentStoryPage - 1)
+                          setCurrentStoryPage(currentStoryPage - 1)
                         }} disabled={currentStoryPage === 0}>Back</Button>
                         <Text>Page {currentStoryPage + 1} of {data.story.length}</Text>
                         <Button onClick={() => {
-                            if (currentStoryPage === data?.story.length - 1) {
+                          if (currentStoryPage === data?.story.length - 1) {
                             setCurrentPage(currentPage + 1)
-                            } else {
+                          } else {
                             setCurrentStoryPage(currentStoryPage + 1)
-                            }
+                          }
                         }}>{currentStoryPage === data?.story.length - 1 ? "Quiz" : "Next"}</Button>
-                        </div>
+                      </div>
                     </>
                     : null}
                 </div> : currentPage === 2 ?
-                    <div className="grid">
+                  <div className="grid">
                     <Text>{data ? data?.first_question : null}</Text>
                     <Textarea
-                        placeholder="Answer here"
-                        value={prompt}
-                        onChange={(e) => setPrompt(e.target.value)}
+                      placeholder="Answer here"
+                      borderColor="gray.500"
+                      borderRadius="md"
+                      focusBorderColor="blue.500"
+                      value={answer}
+                      onChange={(e) => setAnswer(e.target.value)}
                     />
                     <Button onClick={onClickPt2} isLoading={isQuizDataLoading}>Grade</Button>
-                    </div> :
-                    <div className="grid">
+                  </div> :
+                  <div className="grid">
                     {quizData?.is_correct ? <CheckCircleIcon boxSize={14} color={'green'} /> : <CloseIcon color={'red'} />}
                     {quizData?.image ? <Image src={quizData.image} /> : null}
                     {quizData?.llm_response ? <Text>{quizData.llm_response}</Text> : null}
-                    </div>
-            }
+                    <Button onClick={onClickPt3} isLoading={isQuizDataLoading}>Finish</Button>
+                  </div>
+          }
         </Box>
-        </div>
+      </div>
     </>
   );
 }

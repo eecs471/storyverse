@@ -30,7 +30,7 @@ openai.api_key = os.environ['OPENAI_API_KEY']
 chat_llm_model = "gpt-4"
 chat = ChatOpenAI(temperature=0.0, model=chat_llm_model)
 
-image_llm = OpenAI(temperature=0.9)
+image_llm = OpenAI(temperature=0.0)
 
 together_ai = 'https://api.together.xyz/inference'
 
@@ -75,7 +75,6 @@ def create_story(outline, age):
 
     The response must be in **JSON format** as follows:
     - The key for each section will be the paragraph number (e.g., "paragraph1", "paragraph2", "paragraph3").
-    - In the first paragraph, include in quotations the source story or historical event used to generate the response (e.g. "humpty dumpty", "the life of alan turing") followed by the actual story.
     - Each value will be the corresponding paragraph text.
     - Include a key called "question" with the comprehension question as its value.
 
@@ -144,7 +143,7 @@ def generate_image_descriptions(story, age):
 def _generate_image(image_description, age):
     prompt = PromptTemplate(
         input_variables=["image_description"],
-        template="""Generate the image so that it is in the style of a story book fit for 4 year old children. \
+        template="""Generate the image so that it is in the style of a rendered in a detailed, animated, CGI-inspired style \
             The following is a description of a scene: {image_description}.
         """
     )
@@ -155,10 +154,29 @@ def _generate_image(image_description, age):
     
     return image_url
 
-def _generate_image_stable_diff(image_desc):
-    template="""Generate the image so that it is in the style of a story book fit for 4 year old children. \
-        The following is a description of a scene: {0}.
-    """.format(image_desc)
+    
+def _generate_image_stable_diff(image_desc, artStyle):
+    print(artStyle)
+    template = ""
+    if artStyle == 'picture book':
+        template="""Generate an image in the high-quality, style of a picture book. \
+        The following is a description of the scene that you MUST include all details of it: {0}.
+        """.format(image_desc)
+    elif artStyle == 'pixar':
+        template="""Generate an image in the high-quality, 3D-rendered style of Pixar films. \
+       The following is a description of the scene that you MUST include all details of it: {0}.
+       """.format(image_desc)
+    elif artStyle == 'comic':
+        template="""Generate an image in the high-quality, style of comic books. \
+        The following is a description of the scene that you MUST include all details of it: {0}.
+        """.format(image_desc)
+    elif artStyle == 'abstract':
+        template="""Generate an image in the art style of cubism while still following the description. \
+        The following is a description of the scene that you MUST include all details of it: {0}.
+        """.format(image_desc)
+    else:
+        print("art style invalid")
+    print(template)
 
     client = Together(api_key=os.environ.get('TOGETHER_API_KEY'))
     response = client.images.generate(
@@ -183,11 +201,11 @@ def _generate_image_stable_diff(image_desc):
         return image
     return ""
 
-def generate_images(image_descriptions, age):
+def generate_images(image_descriptions, age, artStyle):
     images = {}
     for i, image_desc in image_descriptions.items():
         # image_url = _generate_image(image_desc, age)
-        image_url = _generate_image_stable_diff(image_desc)
+        image_url = _generate_image_stable_diff(image_desc, artStyle)
         images[i] = image_url
     
     return images
@@ -215,6 +233,7 @@ class Story(BaseModel):
 class StoryGenerateRequestBody(BaseModel):
     prompt: str
     age: str
+    artStyle: str
 
 
 class StoryGenerateResponse(BaseModel):
@@ -224,16 +243,18 @@ class StoryGenerateResponse(BaseModel):
 
 @app.post("/story", response_model=StoryGenerateResponse)
 async def generate(request_body: StoryGenerateRequestBody):
+
     story = create_story(request_body.prompt, request_body.age)
     print("STORIES")
     print(story)
     descriptions = generate_image_descriptions(story, request_body.age)
     print("DESCRIPTIONS")
     print(descriptions)
-    images = generate_images(descriptions, request_body.age)
+    print("ART STYLE")
+    artStyle = request_body.artStyle
+    print(request_body)
+    images = generate_images(descriptions, request_body.age, artStyle)
     #import pdb; pdb.set_trace()
-    print("IMAGES")
-    print(images)
 
     return_val = {"story": [], "first_question": story["question"]}
 
@@ -268,7 +289,17 @@ async def quiz_response(request_body: QuizResponseRequestBody):
 
 @app.post("/grammar", response_model=grammar.GrammarQuiz)
 async def generate_grammar_quiz(request_body: grammar.GrammarQuizGenerateRequestBody):
-    return grammar.generate_grammar_quiz(request_body.age, request_body.interests)
+    quiz_content = grammar.generate_grammar_quiz(request_body.age, request_body.interests)
+    images = grammar.generate_images_grammar_quiz_stable_diff(request_body.interests, len(quiz_content["quiz"]))
+    for i in range(len(quiz_content["quiz"])):
+        image = ""
+        if i < len(images):
+            image = images[i]
+        
+        question = quiz_content["quiz"][i]
+        question["image"] = image
+    
+    return quiz_content
 
 @app.post("/grammarchatapi")
 async def handle_grammar_quiz_chat(request_body: grammar.GrammarChatRequestBody):
