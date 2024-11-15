@@ -19,6 +19,8 @@ export type STORY_RESPONSE_SCHEMA = {
 }
 
 export type QUIZ_REQUEST_SCHEMA = {
+    story: string
+    question: string
     answer: string
 }
 
@@ -34,11 +36,11 @@ const apiClient = axios.create({
 });
 
 export const fetchStory = async (age: string, prompt: string, artStyle: string): Promise<STORY_RESPONSE_SCHEMA> => {
-    const response = await apiClient.post<STORY_RESPONSE_SCHEMA>('/story', { prompt: prompt, age: age, artStyle: artStyle});
+    const response = await apiClient.post<STORY_RESPONSE_SCHEMA>('/story', { prompt: prompt, age: age, artStyle: artStyle });
     return response.data;
 };
 
-export const fetchQuizResponse = async (answer: string): Promise<QUIZ_RESPONSE_SCHEMA> => {
-    const response = await apiClient.post<QUIZ_RESPONSE_SCHEMA>('/quiz-response', { answer: answer });
+export const fetchQuizResponse = async (story: string, question: string, answer: string): Promise<QUIZ_RESPONSE_SCHEMA> => {
+    const response = await apiClient.post<QUIZ_RESPONSE_SCHEMA>('/quiz-response', { story: story, question: question, answer: answer });
     return response.data;
 };

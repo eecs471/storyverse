@@ -26,6 +26,8 @@ function Story() {
   const [currentStoryPage, setCurrentStoryPage] = useState(0)
   const [currentAge, setCurrentAge] = useState('')
   const [prompt, setPrompt] = useState('')
+  const [story, setStory] = useState('')
+  const [question, setQuestion] = useState('')
   const [answer, setAnswer] = useState('')
   const [artStyle, setArtStyle] = useState('picture book');
   const { data, isLoading, refetch } = useQuery<STORY_RESPONSE_SCHEMA>({
@@ -36,7 +38,7 @@ function Story() {
   })
   const { data: quizData, isLoading: isQuizDataLoading, refetch: refetchQuizResponse } = useQuery<QUIZ_RESPONSE_SCHEMA>({
     queryKey: ['response'],
-    queryFn: () => fetchQuizResponse(answer),
+    queryFn: () => fetchQuizResponse(story, question, answer),
     refetchOnWindowFocus: false,
     enabled: false
   })
@@ -47,6 +49,11 @@ function Story() {
       navigate('/login');
     }
   }, []);
+
+  useEffect(() => {
+    setStory(data?.story.map((page) => page.page_text).join(' ') || '')
+    setQuestion(data?.first_question || '')
+  }, [data]);
 
   const onClickPt1 = async () => {
     await refetch()
@@ -63,6 +70,8 @@ function Story() {
     setCurrentAge('')
     setPrompt('')
     setAnswer('')
+    setQuestion('')
+    setStory('')
     setCurrentStoryPage(0)
     setArtStyle('picture book');
     queryClient.resetQueries({ 'queryKey': ['generate'] });
@@ -163,6 +172,7 @@ function Story() {
                     {quizData?.is_correct ? <CheckCircleIcon boxSize={14} color={'green'} /> : <CloseIcon color={'red'} />}
                     {quizData?.image ? <Image src={quizData.image} /> : null}
                     {quizData?.llm_response ? <Text>{quizData.llm_response}</Text> : null}
+
                     <Button onClick={onClickPt3} isLoading={isQuizDataLoading}>Finish</Button>
                   </div>
           }

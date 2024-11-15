@@ -116,6 +116,36 @@ def validate_answer(story, answer):
 
     return response.content
 
+def validate_answer_with_llm(story, question, answer):
+    """
+    Uses the LLM to validate the answer against the story and question.
+    """
+    template_string = """
+    You are an educational assistant helping children evaluate their answers to story comprehension questions. \
+    Based on the following story and question, determine if the provided answer is correct. \
+    Respond with a JSON object containing the following fields:
+    - "is_correct" (true or false): Whether the answer is correct.
+    - "feedback" (string): A short explanation of why the answer is correct or incorrect.
+
+    story: ```{story}```
+    question: ```{question}```
+    answer: ```{answer}```
+
+    Your response MUST be in JSON format only.
+    """
+
+    # Create a prompt using the story, question, and answer
+    prompt_template = ChatPromptTemplate.from_template(template_string)
+    prompt = prompt_template.format_messages(
+        story=story, question=question, answer=answer
+    )
+
+    # Use the LLM to evaluate the answer
+    response = chat(prompt)
+    response_content = json.loads(response.content)
+
+    return response_content
+
 def _generate_image_description(story, age, scene):
     image_desc = """Given the following story context: {story}. \
         Generate an image description that MUST be relevant for a {age} year old and \
@@ -221,7 +251,8 @@ app.add_middleware(
 )
 
 test_txt = "Image of a cat"
-test_img = "https://images.unsplash.com/photo-1608848461950-0fe51dfc41cb?auto=format&fit=crop&q=80&w=2487&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+img_good = "https://images.unsplash.com/photo-1608848461950-0fe51dfc41cb?auto=format&fit=crop&q=80&w=2487&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+img_bad = "https://assets.iflscience.com/assets/articleNo/52517/aImg/28856/1558364913-cover-image-l.jpg"
 
 test_question = "How are you today?"
 
@@ -269,6 +300,8 @@ async def generate(request_body: StoryGenerateRequestBody):
 
 
 class QuizResponseRequestBody(BaseModel):
+    story: str
+    question: str
     answer: str
 
 class QuizResponseModel(BaseModel):
@@ -280,11 +313,27 @@ class QuizResponseModel(BaseModel):
 
 @app.post("/quiz-response", response_model=QuizResponseModel)
 async def quiz_response(request_body: QuizResponseRequestBody):
+    # Extract story, question, and answer from request
+    story = request_body.story
+    question = request_body.question
+    answer = request_body.answer
+
+    # Use the LLM to validate the answer
+    validation_result = validate_answer_with_llm(story, question, answer)
+
+    # Extract the fields from the LLM's response
+    is_correct = validation_result.get("is_correct", False)
+    llm_response = validation_result.get("feedback", "No feedback provided.")
+    
+    # Optional: Generate a follow-up question or an image based on the response
+    image = img_good if is_correct else img_bad  # Placeholder or dynamically generated image
+    next_question = ""  # Leave empty or implement follow-up logic
+
     return {
-        "image": test_img,
-        "llm_response": "Correct response",
-        "is_correct": True,
-        "next_question": ""
+        "image": image,
+        "llm_response": llm_response,
+        "is_correct": is_correct,
+        "next_question": next_question,
     }
 
 @app.post("/grammar", response_model=grammar.GrammarQuiz)
