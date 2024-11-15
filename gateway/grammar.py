@@ -23,6 +23,8 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain_openai import OpenAI
 from langchain.schema import SystemMessage, HumanMessage, AIMessage
+import cv2
+import numpy as np
 
 openai.api_key = os.environ['OPENAI_API_KEY']
 
@@ -94,26 +96,41 @@ def generate_grammar_quiz(age, interests):
     
     return {"quiz": quiz, "correctAnswers": correctAnswers}
 
-def generate_image_grammar_quiz_stable_diff(image_desc):
-    template="""Generate an engaging image for a grammar quiz question with the following text: {0}
-    """.format(image_desc)
+def generate_images_grammar_quiz_stable_diff(interests, num):
+    interests = ", ".join(interests)
+    template="""Generate engaging, funny images for a young student about {interests}
+    """.format(interests=interests)
 
-    client = Together(api_key=os.environ.get('TOGETHER_API_KEY'))
-    response = client.images.generate(
-        model="stabilityai/stable-diffusion-xl-base-1.0",
-        prompt=template,
-        width=256,
-        height=256,
-        steps=10,
-        n=1
-    )
-    images = response.data
-    image_url = images[0].url
-    response = requests.get(image_url)
-    if response.status_code == 200:
-        image = base64.b64encode(response.content).decode('utf-8')
-        return image
-    return ""
+    images = []
+    while len(images) < num:
+        images_to_generate_this_cycle = min(4, num - len(images))
+        client = Together(api_key=os.environ.get('TOGETHER_API_KEY'))
+        response = client.images.generate(
+            model="stabilityai/stable-diffusion-xl-base-1.0",
+            prompt=template,
+            width=1024,
+            height=1024,
+            steps=25,
+            n=images_to_generate_this_cycle
+        )
+        response_data = response.data
+
+        for img in response_data:
+            image_url = img.url
+            response = requests.get(image_url)
+            if response.status_code == 200:
+                image_data = response.content
+                np_image_array = np.frombuffer(image_data, np.uint8)
+                
+                image_data = cv2.imdecode(np_image_array, cv2.IMREAD_UNCHANGED)   
+                image_data = cv2.resize(image_data, (512, 512), interpolation=cv2.INTER_LANCZOS4)
+        
+                success, image_data = cv2.imencode('.png', image_data)
+                images.append(base64.b64encode(image_data).decode('utf-8'))
+            else:
+                images.append("")
+        
+    return images
 
 class GrammarQuizGenerateRequestBody(BaseModel):
     age: int

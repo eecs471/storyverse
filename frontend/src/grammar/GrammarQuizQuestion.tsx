@@ -1,6 +1,7 @@
 import React from "react";
 import { useState } from "react"
 import { Button, Input, Image } from '@chakra-ui/react'
+import "./GrammarQuizQuestion.css"
 
 export interface QuizQuestion {
     questionIndex: number;
