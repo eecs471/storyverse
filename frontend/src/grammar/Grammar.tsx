@@ -1,7 +1,7 @@
 import { Navbar } from "../Navbar"
 import { Link, useNavigate } from 'react-router-dom';
 import { auth, db } from "../config/firebase"
-import { getDoc, doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { getDoc, doc, deleteDoc, updateDoc,arrayUnion } from 'firebase/firestore';
 import React, { useState, useEffect } from 'react';
 import { Button, Input, Spinner } from '@chakra-ui/react'
 import "./Grammar.css"
@@ -53,7 +53,10 @@ export const Grammar = () => {
         }
         
     }
-
+    const goToGrammarQuizzes = () => {
+        navigate('/grammar-quizzes');
+    };
+    
     return (
         <>
             <Navbar />
@@ -65,12 +68,21 @@ export const Grammar = () => {
                 <div className="quiz">
                     <GrammarQuiz quiz={quizContent.quiz} correctAnswers={quizContent.correctAnswers}/> 
                 </div>
-                : <Button 
+                : 
+                <div>
+                <Button 
                     onClick={generate}
                     isLoading={isLoading}
                     loadingText="Generating..."> 
                     Generate Grammar Quiz 
-                  </Button>}
+                  </Button>
+                <br />
+                <Button onClick={goToGrammarQuizzes} colorScheme="teal" mt={4}>
+                    Go to Your Grammar Quizzes
+                </Button>
+                </div>
+
+                }   
             </div>
         </>
     )

@@ -4,6 +4,7 @@ import { Login } from "./auth/Login"
 import { Signup } from "./auth/Signup"
 import { Profile } from "./auth/Profile"
 import { Routes, Route } from 'react-router-dom';
+import { GrammarQuizList } from './grammar/GrammarHistory';
 
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/grammar-quizzes" element={<GrammarQuizList />} />
       </Routes>
     </div>
   );
