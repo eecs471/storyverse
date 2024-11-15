@@ -1,9 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from "../config/firebase";
-import { Box, Flex, Text, Button, VStack, Divider } from '@chakra-ui/react';
+import { auth, db,storageBucket,storage } from "../config/firebase";
+import { Box, Flex, Text, Button, VStack, Divider,Image } from '@chakra-ui/react';
 import { Navbar } from "../Navbar";
+import { getDownloadURL, ref } from "firebase/storage";
 
+interface QuizImageProps {
+    imagePath: string; // 文件的路径，例如：quiz_images/.../image.jpg
+  }
+  
+  const QuizImage: React.FC<QuizImageProps> = ({ imagePath }) => {
+    const [imageUrl, setImageUrl] = useState<string | null>(null);
+  
+    useEffect(() => {
+      const fetchImage = async () => {
+        const imageRef = ref(storage, imagePath);
+  
+        try {
+          const url = await getDownloadURL(imageRef);
+          setImageUrl(url);
+        } catch (error) {
+          console.error("Error fetching image URL:", error);
+        }
+      };
+  
+      fetchImage();
+    }, [imagePath]); // 当路径变化时重新加载图片
+  
+    return (
+      <div className="image">
+        {imageUrl ? (
+            
+          <Image src={imageUrl} alt="Image Loading Failed"/>
+        ) : (
+          <p>Loading image...</p>
+        )}
+      </div>
+    );
+  };
 export const GrammarQuizList = () => {
     const [quizzes, setQuizzes] = useState<any[]>([]);
     const [selectedQuiz, setSelectedQuiz] = useState<any | null>(null);
@@ -76,9 +110,12 @@ export const GrammarQuizList = () => {
                         <VStack align="stretch" spacing={4}>
                         {selectedQuiz.questions.map((q: any, index: number) => (
                                 <>
-                                    
                                 {q.userAnswer === q.correctAnswer && <span className="correct">✔️</span>}
                                 {q.userAnswer !== q.correctAnswer && <span className="incorrect">❌</span>}
+                                <div className="image">
+                                <QuizImage imagePath={q.image} />
+                                </div>
+
                                 <strong>{q.question}</strong>
                                 {q.answerChoices.map((answerChoice: string[], index: number) => (
                                     <div className="multiple-choice-option">
