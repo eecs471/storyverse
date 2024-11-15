@@ -16,7 +16,7 @@ import { signOut } from "firebase/auth"
 import { Navbar } from "./Navbar"
 import Storyverse from './storyverse.png'
 import _ from 'lodash';
-
+import { Select } from '@chakra-ui/react';
 
 function Story() {
   // For navigating between different components
@@ -26,9 +26,10 @@ function Story() {
   const [currentStoryPage, setCurrentStoryPage] = useState(0)
   const [currentAge, setCurrentAge] = useState('')
   const [prompt, setPrompt] = useState('')
+  const [artStyle, setArtStyle] = useState('picture book');
   const { data, isLoading, refetch } = useQuery<STORY_RESPONSE_SCHEMA>({
     queryKey: ['generate'],
-    queryFn: () => fetchStory(currentAge, prompt),
+    queryFn: () => fetchStory(currentAge, prompt, artStyle),
     refetchOnWindowFocus: false,
     enabled: false
   })
@@ -68,6 +69,16 @@ function Story() {
                   Welcome to Storyverse!
                 </Text>
                 <Image className="App-logo" src={Storyverse} />
+                <Select 
+                  placeholder="Select art style" 
+                  value={artStyle} 
+                  onChange={(e) => setArtStyle(e.target.value)}
+                >
+                  <option value="picture book">Picture Book</option>
+                  <option value="comic">Comic</option>
+                  <option value="pixar">Pixar</option>
+                  <option value="abstract">Abstract</option>
+                </Select>
                 <Input 
                   borderColor="gray.500" 
                   borderRadius="md" 

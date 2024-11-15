@@ -154,18 +154,25 @@ def _generate_image(image_description, age):
     
     return image_url
 
-    # template="""Generate an image in the high-quality, 3D-rendered style of Pixar films. \
-    #    The following is a description of the scene that you MUST include all details of it: {0}.
-
-    # template="""Generate an image in the high-quality, 3D-rendered style of comic books. \
-    #    The following is a description of the scene that you MUST include all details of it: {0}.
-
-    # template="""Generate an image in the high-quality, 3D-rendered style of a picture book. \
-    #    The following is a description of the scene that you MUST include all details of it: {0}.
-def _generate_image_stable_diff(image_desc):
-    template="""Generate an image in the high-quality, 3D-rendered style of a picture book. \
+    
+def _generate_image_stable_diff(image_desc, artStyle):
+    template = ""
+    if artStyle == 'picture book':
+        template="""Generate an image in the high-quality, style of a picture book. \
+        The following is a description of the scene that you MUST include all details of it: {0}.
+        """.format(image_desc)
+    elif artStyle == 'pixar':
+        template="""Generate an image in the high-quality, 3D-rendered style of Pixar films. \
        The following is a description of the scene that you MUST include all details of it: {0}.
-    """.format(image_desc)
+       """.format(image_desc)
+    elif artStyle == 'comic':
+        template="""Generate an image in the high-quality, style of comic books. \
+        The following is a description of the scene that you MUST include all details of it: {0}.
+        """.format(image_desc)
+    elif artStyle == 'abstract':
+        template="""Generate an image in the art style of cubism while still following the description. \
+        The following is a description of the scene that you MUST include all details of it: {0}.
+        """.format(image_desc)
 
     client = Together(api_key=os.environ.get('TOGETHER_API_KEY'))
     response = client.images.generate(
@@ -190,11 +197,11 @@ def _generate_image_stable_diff(image_desc):
         return image
     return ""
 
-def generate_images(image_descriptions, age):
+def generate_images(image_descriptions, age, artStyle):
     images = {}
     for i, image_desc in image_descriptions.items():
         # image_url = _generate_image(image_desc, age)
-        image_url = _generate_image_stable_diff(image_desc)
+        image_url = _generate_image_stable_diff(image_desc, artStyle)
         images[i] = image_url
     
     return images
@@ -222,6 +229,7 @@ class Story(BaseModel):
 class StoryGenerateRequestBody(BaseModel):
     prompt: str
     age: str
+    artStyle: str
 
 
 class StoryGenerateResponse(BaseModel):
@@ -231,13 +239,17 @@ class StoryGenerateResponse(BaseModel):
 
 @app.post("/story", response_model=StoryGenerateResponse)
 async def generate(request_body: StoryGenerateRequestBody):
+
     story = create_story(request_body.prompt, request_body.age)
     print("STORIES")
     print(story)
     descriptions = generate_image_descriptions(story, request_body.age)
     print("DESCRIPTIONS")
     print(descriptions)
-    images = generate_images(descriptions, request_body.age)
+    print("ART STYLE")
+    # artStyle = request_body.artStyle
+    print(request_body)
+    images = generate_images(descriptions, request_body.age, 'artStyle')
     #import pdb; pdb.set_trace()
 
     return_val = {"story": [], "first_question": story["question"]}
