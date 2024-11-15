@@ -7,6 +7,7 @@ const GENERATE_API = "http://localhost:8000"
 export type STORY_REQUEST_SCHEMA = {
     prompt: string
     age: string
+    artStyle: string
 }
 
 export type STORY_RESPONSE_SCHEMA = {
@@ -32,8 +33,8 @@ const apiClient = axios.create({
     baseURL: GENERATE_API,
 });
 
-export const fetchStory = async (age: string, prompt: string): Promise<STORY_RESPONSE_SCHEMA> => {
-    const response = await apiClient.post<STORY_RESPONSE_SCHEMA>('/story', { prompt: prompt, age: age });
+export const fetchStory = async (age: string, prompt: string, artStyle: string): Promise<STORY_RESPONSE_SCHEMA> => {
+    const response = await apiClient.post<STORY_RESPONSE_SCHEMA>('/story', { prompt: prompt, age: age, artStyle: artStyle});
     return response.data;
 };
 

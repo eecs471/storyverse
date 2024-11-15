@@ -94,6 +94,27 @@ def generate_grammar_quiz(age, interests):
     
     return {"quiz": quiz, "correctAnswers": correctAnswers}
 
+def generate_image_grammar_quiz_stable_diff(image_desc):
+    template="""Generate an engaging image for a grammar quiz question with the following text: {0}
+    """.format(image_desc)
+
+    client = Together(api_key=os.environ.get('TOGETHER_API_KEY'))
+    response = client.images.generate(
+        model="stabilityai/stable-diffusion-xl-base-1.0",
+        prompt=template,
+        width=256,
+        height=256,
+        steps=10,
+        n=1
+    )
+    images = response.data
+    image_url = images[0].url
+    response = requests.get(image_url)
+    if response.status_code == 200:
+        image = base64.b64encode(response.content).decode('utf-8')
+        return image
+    return ""
+
 class GrammarQuizGenerateRequestBody(BaseModel):
     age: int
     interests: list[str]
@@ -101,6 +122,7 @@ class GrammarQuizGenerateRequestBody(BaseModel):
 class GrammarQuestion(BaseModel):
     question: str
     answerChoices: list[str]
+    image: str
 
 class GrammarQuiz(BaseModel):
     quiz: list[GrammarQuestion]
