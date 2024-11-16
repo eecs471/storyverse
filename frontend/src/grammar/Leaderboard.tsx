@@ -2,7 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 import { auth, db } from "../config/firebase"
 import { getDoc, doc, deleteDoc, updateDoc, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
-import { Textarea, Button, Box, Input } from '@chakra-ui/react'
+import { Box, Table, Thead, Tbody, Tr, Th, Td, TableCaption } from "@chakra-ui/react";
 
 export interface LeaderboardEntry {
     name: string;
@@ -34,27 +34,25 @@ export const Leaderboard = () => {
     return (
         <>
             {leaderboardEntries ?
-            <Box>
-                <table>
-                    <caption>Grammar Leaderboard</caption>
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Score</th>
-                        </tr>
-                    </thead>
-                    <tbody> 
-                        {leaderboardEntries.map((leaderboardEntry, index) => (
-                            <tr key={index}>
-                                <td> {index + 1} </td>
-                                <td> {leaderboardEntry.name} </td>
-                                <td> {leaderboardEntry.score} </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </Box>
+            <Table variant="striped" colorScheme="teal" maxWidth={200}>
+                <TableCaption placement="top" fontSize="lg" fontWeight="bold"> Grammar Leaderboard </TableCaption>
+                <Thead>
+                    <Tr>
+                        <Th isNumeric>#</Th>
+                        <Th>Name</Th>
+                        <Th isNumeric>Score</Th>
+                    </Tr>
+                </Thead>
+                <Tbody> 
+                    {leaderboardEntries.map((leaderboardEntry, index) => (
+                        <Tr key={index}>
+                            <Td isNumeric> {index + 1} </Td>
+                            <Td> {leaderboardEntry.name} </Td>
+                            <Td isNumeric> {leaderboardEntry.score} </Td>
+                        </Tr>
+                    ))}
+                </Tbody>
+            </Table>
             : 
                 <text> Loading... </text>
             }
