@@ -8,6 +8,7 @@ import "./Grammar.css"
 import axios from "axios"
 import { GrammarQuiz, QuizQuestionList } from "./GrammarQuiz";
 import { Leaderboard } from "./Leaderboard";
+import { Gamification } from "./Gamification";
 
 export const Grammar = () => {
     const [userData, setUserData] = useState<any>(null);
@@ -80,6 +81,8 @@ export const Grammar = () => {
                         loadingText="Generating..."> 
                         Generate Grammar Quiz 
                     </Button>
+
+                    <Gamification />
 
                     <Leaderboard />
                     </>
