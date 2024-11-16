@@ -75,7 +75,7 @@ export const Gamification = () => {
     }, [streak]);
 
     return (
-        <Box>
+        <Box className="gamification-box">
             {/* Gamification Header */}
             <Table colorScheme="teal" maxWidth={600} margin="auto">
                 <TableCaption placement="top" fontSize="lg" fontWeight="bold"> Gamification Dashboard </TableCaption>

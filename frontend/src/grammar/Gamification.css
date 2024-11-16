@@ -1,0 +1,17 @@
+.dashboard-actions {
+    display: flex;
+    flex-direction: column; /* Stack content vertically */
+    align-items: center; /* Center items horizontally */
+    gap: 7rem; /* Add spacing between the button and gamification */
+    margin-top: 7rem; /* Add spacing between sections */
+}
+
+.gamification-box {
+    border: 2px solid teal; /* Adds a teal border around the box */
+    border-radius: 10px; /* Adds rounded corners */
+    padding: 20px; /* Adds space inside the box */
+    margin: 20px auto; /* Adds space outside the box and centers it horizontally */
+    max-width: 700px; /* Optional: Limits the width of the box */
+    background-color: #f5f5f5; /* Adds a subtle background color */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Adds a shadow for a 3D effect */
+}

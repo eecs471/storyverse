@@ -9,6 +9,7 @@ import axios from "axios"
 import { GrammarQuiz, QuizQuestionList } from "./GrammarQuiz";
 import { Leaderboard } from "./Leaderboard";
 import { Gamification } from "./Gamification";
+import './Gamification.css';
 
 export const Grammar = () => {
     const [userData, setUserData] = useState<any>(null);
@@ -71,18 +72,20 @@ export const Grammar = () => {
                     </div>
                     : 
                     <>
+                    <div className="dashboard-actions">
                     <Button onClick={goToGrammarQuizzes} colorScheme="teal" mt={4}>
                         Go to Your Grammar Quizzes
                     </Button>
-
+                    
                     <Button 
                         onClick={generate}
                         isLoading={isLoading}
                         loadingText="Generating..."> 
                         Generate Grammar Quiz 
                     </Button>
-
                     <Gamification />
+                    </div>
+
 
                     <Leaderboard />
                     </>
