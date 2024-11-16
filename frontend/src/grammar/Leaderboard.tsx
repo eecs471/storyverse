@@ -34,7 +34,7 @@ export const Leaderboard = () => {
     return (
         <>
             {leaderboardEntries ?
-            <Table variant="striped" colorScheme="teal" maxWidth={200}>
+            <Table colorScheme="teal" maxWidth={200}>
                 <TableCaption placement="top" fontSize="lg" fontWeight="bold"> Grammar Leaderboard </TableCaption>
                 <Thead>
                     <Tr>
@@ -45,7 +45,7 @@ export const Leaderboard = () => {
                 </Thead>
                 <Tbody> 
                     {leaderboardEntries.map((leaderboardEntry, index) => (
-                        <Tr key={index}>
+                        <Tr key={index} bg="blue.100" _hover={{ bg: "blue.200" }}>
                             <Td isNumeric> {index + 1} </Td>
                             <Td> {leaderboardEntry.name} </Td>
                             <Td isNumeric> {leaderboardEntry.score} </Td>
