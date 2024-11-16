@@ -17,11 +17,13 @@ export const Profile = () => {
 
     const [interest, setInterest] = useState<string>("");
     const [interests, setInterests] = useState<string[]>([]);
+    const [loading, setLoading] = useState<boolean>(true);
 
     let userEmail = "";
     if (auth?.currentUser?.email) {
         userEmail = auth.currentUser.email;
     }
+    
     const userDbRef = doc(db, "users", userEmail);
     
     useEffect(() => {
@@ -39,6 +41,8 @@ export const Profile = () => {
             }
             catch (err) {
                 console.error(err);
+            } finally {
+                setLoading(false); 
             }
         };
 
@@ -102,6 +106,10 @@ export const Profile = () => {
         catch (err) {
             console.error(err);
         }
+    }
+
+    if (loading) {
+        return null;
     }
 
     return (
