@@ -26,10 +26,14 @@ from langchain.schema import SystemMessage, HumanMessage, AIMessage
 import cv2
 import numpy as np
 
+from backend_firebase import db
+
 openai.api_key = os.environ['OPENAI_API_KEY']
 
 chat_llm_model = "gpt-3.5-turbo"
 chat = ChatOpenAI(temperature=0.0, model=chat_llm_model)
+
+
 
 def generate_grammar_quiz(age, interests):
     template = """Make a 5 question multiple choice grammar quiz with a difficulty level tailored towards {age} year olds. \
