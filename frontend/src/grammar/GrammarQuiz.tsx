@@ -124,10 +124,19 @@ export const GrammarQuiz: React.FC<QuizQuestionList> = ({quiz, correctAnswers}) 
             // 保存到 Firestore
             try {
                 const userDbRef = doc(db, "users", auth.currentUser?.email as string);
+                const userData = await getDoc(userDbRef);
+                let numGrammarQuestionsAnsweredCorrectly = numCorrect;
+
+                if (userData?.data()?.grammarQuestionsAnsweredCorrectly) {
+                    numGrammarQuestionsAnsweredCorrectly += userData?.data()?.grammarQuestionsAnsweredCorrectly;
+                }
+
     
                 await updateDoc(userDbRef, {
                     grammarquizResults: arrayUnion(quizResult), // 添加结果到 grammarquizResults 数组
+                    grammarQuestionsAnsweredCorrectly: numGrammarQuestionsAnsweredCorrectly,
                 });
+
     
                 console.log("Quiz results saved successfully!");
             } catch (err) {

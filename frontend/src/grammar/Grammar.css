@@ -1,6 +1,17 @@
-.grammar-quiz {
+.grammar {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    margin-top: 50px;
+    width: 100%;
+}
+
+.grammar-dashboard {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    margin-top: 25px;
+    width: 100%;
 }

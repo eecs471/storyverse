@@ -110,13 +110,14 @@ export const GrammarQuizList = () => {
                         <VStack align="stretch" spacing={4}>
                         {selectedQuiz.questions.map((q: any, index: number) => (
                                 <>
-                                {q.userAnswer === q.correctAnswer && <span className="correct">✔️</span>}
-                                {q.userAnswer !== q.correctAnswer && <span className="incorrect">❌</span>}
                                 <div className="image">
                                 <QuizImage imagePath={q.image} />
                                 </div>
-
-                                <strong>{q.question}</strong>
+                                <div className="question-text"> 
+                                    {q.userAnswer === q.correctAnswer && <span className="correct">✔️</span>}
+                                    {q.userAnswer !== q.correctAnswer && <span className="incorrect">❌</span>}
+                                    <strong>{q.question}</strong>
+                                </div>
                                 {q.answerChoices.map((answerChoice: string[], index: number) => (
                                     <div className="multiple-choice-option">
                                         <input 

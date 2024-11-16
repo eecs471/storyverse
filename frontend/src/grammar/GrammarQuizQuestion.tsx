@@ -27,12 +27,14 @@ export const GrammarQuizQuestion: React.FC<QuizQuestion> = ({questionIndex, ques
     return (
         <>
             
-            {graded && selectedAnswer === correctAnswer && <span className="correct">✔️</span>}
-            {graded && selectedAnswer !== correctAnswer && <span className="incorrect">❌</span>}
             <div className="image">
                 <Image src={`data:image/png;base64,${image}`} alt={"Image Loading Failed"} />
             </div>
-            <strong>{question}</strong>
+            <div className="question-text"> 
+                {graded && selectedAnswer === correctAnswer && <span className="correct">✔️</span>}
+                {graded && selectedAnswer !== correctAnswer && <span className="incorrect">❌</span>}
+                <strong>{question}</strong>
+            </div>
             {answerChoices.map((answerChoice, index) => (
                 <div className="multiple-choice-option">
                     <input 

@@ -7,6 +7,7 @@ import { Button, Input, Spinner } from '@chakra-ui/react'
 import "./Grammar.css"
 import axios from "axios"
 import { GrammarQuiz, QuizQuestionList } from "./GrammarQuiz";
+import { Leaderboard } from "./Leaderboard";
 
 export const Grammar = () => {
     const [userData, setUserData] = useState<any>(null);
@@ -60,29 +61,30 @@ export const Grammar = () => {
     return (
         <>
             <Navbar />
-            <div className="grammar-quiz">
-                <strong>Grammar Quiz</strong>
-                <br />
-                <br />
-                {quizContent ? 
-                <div className="quiz">
-                    <GrammarQuiz quiz={quizContent.quiz} correctAnswers={quizContent.correctAnswers}/> 
-                </div>
-                : 
-                <div>
-                <Button 
-                    onClick={generate}
-                    isLoading={isLoading}
-                    loadingText="Generating..."> 
-                    Generate Grammar Quiz 
-                  </Button>
-                <br />
-                <Button onClick={goToGrammarQuizzes} colorScheme="teal" mt={4}>
-                    Go to Your Grammar Quizzes
-                </Button>
-                </div>
+            <div className="grammar">
+                <strong>Grammar Dashboard</strong>
+                <div className="grammar-dashboard">
+                    {quizContent ? 
+                    <div className="quiz">
+                        <GrammarQuiz quiz={quizContent.quiz} correctAnswers={quizContent.correctAnswers}/> 
+                    </div>
+                    : 
+                    <>
+                    <Button onClick={goToGrammarQuizzes} colorScheme="teal" mt={4}>
+                        Go to Your Grammar Quizzes
+                    </Button>
 
-                }   
+                    <Button 
+                        onClick={generate}
+                        isLoading={isLoading}
+                        loadingText="Generating..."> 
+                        Generate Grammar Quiz 
+                    </Button>
+
+                    <Leaderboard />
+                    </>
+                    }
+                </div>
             </div>
         </>
     )
