@@ -25,7 +25,14 @@ from langchain.chains import LLMChain
 from langchain_openai import OpenAI
 import grammar
 
+import firebase_admin
+from firebase_admin import credentials, auth
+from firebase_admin import firestore
+from backend_firebase import db
+
 openai.api_key = os.environ['OPENAI_API_KEY']
+
+
 
 chat_llm_model = "gpt-4"
 chat = ChatOpenAI(temperature=0.0, model=chat_llm_model)
@@ -33,6 +40,10 @@ chat = ChatOpenAI(temperature=0.0, model=chat_llm_model)
 image_llm = OpenAI(temperature=0.0)
 
 together_ai = 'https://api.together.xyz/inference'
+
+
+
+
 
 def create_story_v1(outline, age):
     template_string = """Generate a story for a {age} year old girl \
@@ -57,7 +68,7 @@ def create_story_v1(outline, age):
 
     return story
 
-def create_story(outline, age):
+def create_story(outline, age, interests):
     # template_string = """Generate a story for a {age} year old girl \
     #     which consists of three paragraphs with each paragraph four sentences long. \
     #     The story should be about the following: ```{outline}``` \
@@ -71,6 +82,7 @@ def create_story(outline, age):
     template_string = """ 
     {agent_role}. Generate an engaging story for a {age}-year-old child that consists of three sections. 
     The story should be written in simple, age-appropriate language and should align with the following topic or outline: ```{outline}```. 
+    Additionally, incorporate the following interests to make the story more relatable and engaging for the child: {interests}.
     Make sure the story is easy to follow and enjoyable for a child of this age. After the story, generate a question to check the child's comprehension of the story.
 
     The response must be in **JSON format** as follows:
@@ -81,13 +93,16 @@ def create_story(outline, age):
     Ensure that the story is coherent, follows the outline, and is appropriate for the child's age.
     """
 
+    
     prompt_template = ChatPromptTemplate.from_template(template_string)
 
     #prompt_template.messages[0].prompt
     story_prompt = prompt_template.format_messages(
                     agent_role=agent_role,
                     age=age,
-                    outline=outline)
+                    outline=outline,
+                    interests=interests)
+    print(story_prompt)
     story_response = chat(story_prompt)
 
     story_response.content = json.loads(story_response.content)
@@ -265,6 +280,7 @@ class StoryGenerateRequestBody(BaseModel):
     prompt: str
     age: str
     artStyle: str
+    email: str
 
 
 class StoryGenerateResponse(BaseModel):
@@ -275,16 +291,21 @@ class StoryGenerateResponse(BaseModel):
 @app.post("/story", response_model=StoryGenerateResponse)
 async def generate(request_body: StoryGenerateRequestBody):
 
-    story = create_story(request_body.prompt, request_body.age)
+    user_data = db.collection('users').document(request_body.email).get().to_dict()
+    user_age = user_data['age']
+    user_interests = user_data['interests']
+    
+
+    story = create_story(request_body.prompt, user_age, user_interests)
     print("STORIES")
     print(story)
-    descriptions = generate_image_descriptions(story, request_body.age)
+    descriptions = generate_image_descriptions(story, user_age)
     print("DESCRIPTIONS")
     print(descriptions)
     print("ART STYLE")
     artStyle = request_body.artStyle
     print(request_body)
-    images = generate_images(descriptions, request_body.age, artStyle)
+    images = generate_images(descriptions, user_age, artStyle)
     #import pdb; pdb.set_trace()
 
     return_val = {"story": [], "first_question": story["question"]}
@@ -352,6 +373,7 @@ async def generate_grammar_quiz(request_body: grammar.GrammarQuizGenerateRequest
 
 @app.post("/grammarchatapi")
 async def handle_grammar_quiz_chat(request_body: grammar.GrammarChatRequestBody):
+    print(request_body.userPrompt)
     response_content = grammar.handle_chat(request_body.userPrompt, request_body.quiz, request_body.userAnswers, request_body.correctAnswers, request_body.history)
     return Response(content=response_content, media_type="text/plain")
 
