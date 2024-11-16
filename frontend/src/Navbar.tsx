@@ -7,6 +7,7 @@ import { Routes, Route } from 'react-router-dom';
 import { Image } from '@chakra-ui/react'
 import { auth } from "./config/firebase"
 import { Link, useNavigate } from 'react-router-dom';
+import { signOut } from "firebase/auth";
 import "./Navbar.css"
 
 export const Navbar = () => {
@@ -14,7 +15,7 @@ export const Navbar = () => {
 
     const logout = async () => {
         try {
-            await logout();
+            await signOut(auth);
             navigate("/login");
         }
         catch(err) {
@@ -25,7 +26,9 @@ export const Navbar = () => {
     return (
         <nav className="navbar">
             <div>
+                <Link to="/">
                 <Image className="navbar-logo" src={Storyverse} />
+                </Link>
             </div>
 
             <ul className="navbar-links">
@@ -37,7 +40,6 @@ export const Navbar = () => {
                     <Link to="/grammar"> Grammar </Link>
                 </li>
 
-                {auth?.currentUser ? (
                 <>
                     <li>
                         <Link to="/profile"> Profile </Link>
@@ -47,12 +49,7 @@ export const Navbar = () => {
                         <button onClick={logout}> Logout </button>
                     </li>
                 </>
-                ) : (
-                    <li>
-                        <Link to="/login"> Login </Link>
-                    </li>
-                )
-                }
+
             </ul>
         </nav>
 
