@@ -17,6 +17,8 @@ import { Navbar } from "./Navbar"
 import Storyverse from './storyverse.png'
 import _ from 'lodash';
 import { Select } from '@chakra-ui/react';
+import { setPersistence, browserLocalPersistence } from "firebase/auth";
+import { onAuthStateChanged } from "firebase/auth";
 
 function Story() {
   // For navigating between different components
@@ -32,10 +34,13 @@ function Story() {
   const [artStyle, setArtStyle] = useState('picture book');
   const { data, isLoading, refetch } = useQuery<STORY_RESPONSE_SCHEMA>({
     queryKey: ['generate'],
-    queryFn: () => fetchStory(currentAge, prompt, artStyle),
+    queryFn: () => {
+      const currentUser = auth.currentUser;
+      return fetchStory(currentAge, prompt, artStyle, currentUser!.email!);
+    },
     refetchOnWindowFocus: false,
     enabled: false
-  })
+  });
   const { data: quizData, isLoading: isQuizDataLoading, refetch: refetchQuizResponse } = useQuery<QUIZ_RESPONSE_SCHEMA>({
     queryKey: ['response'],
     queryFn: () => fetchQuizResponse(story, question, answer),
@@ -44,11 +49,17 @@ function Story() {
   })
 
   useEffect(() => {
-    // Ensure user is logged in before rendering
-    if (!auth.currentUser) {
-      navigate('/login');
-    }
-  }, []);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        console.log("User not logged in, redirecting to login page.");
+        navigate('/login');
+      } else {
+        console.log("User is logged in");
+      }
+    });
+  
+    return () => unsubscribe();
+  }, [navigate]);
 
   useEffect(() => {
     setStory(data?.story.map((page) => page.page_text).join(' ') || '')
@@ -78,6 +89,7 @@ function Story() {
     queryClient.resetQueries({ 'queryKey': ['response'] });
   }
 
+  
   return (
     <>
       <Navbar />
@@ -103,18 +115,7 @@ function Story() {
                   <option value="pixar">Pixar</option>
                   <option value="abstract">Abstract</option>
                 </Select>
-                <Input
-                  borderColor="gray.500"
-                  borderRadius="md"
-                  focusBorderColor="blue.500"
-                  placeholder={"Input your age"}
-                  value={currentAge}
-                  sx={{
-                    '&::placeholder': {
-                      color: 'black',
-                    },
-                  }}
-                  onChange={(e) => setCurrentAge(e.target.value)} />
+
                 <Textarea
                   borderColor="gray.500"
                   borderRadius="md"
