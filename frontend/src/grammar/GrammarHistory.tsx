@@ -4,11 +4,17 @@ import { auth, db,storageBucket,storage } from "../config/firebase";
 import { Box, Flex, Text, Button, VStack, Divider,Image } from '@chakra-ui/react';
 import { Navbar } from "../Navbar";
 import { getDownloadURL, ref } from "firebase/storage";
+import { Grammar } from "./Grammar"
+import { Link, useNavigate } from 'react-router-dom';
 
+import { GrammarQuiz, QuizQuestionList } from "./GrammarQuiz";
+import "./Grammar.css"
+import axios from "axios"
 interface QuizImageProps {
     imagePath: string; // 文件的路径，例如：quiz_images/.../image.jpg
   }
-  
+    
+
   const QuizImage: React.FC<QuizImageProps> = ({ imagePath }) => {
     const [imageUrl, setImageUrl] = useState<string | null>(null);
   
@@ -41,9 +47,49 @@ interface QuizImageProps {
 export const GrammarQuizList = () => {
     const [quizzes, setQuizzes] = useState<any[]>([]);
     const [selectedQuiz, setSelectedQuiz] = useState<any | null>(null);
-    const [graded, setGraded] = useState(false); // Track grading state
-    const [score, setScore] = useState<number | null>(null); // Track score for the selected quiz
+    const [selectedComponent, setSelectedComponent] = useState<string | null>(null); // State to track the displayed component
+    const [quizContent, setQuizContent] = useState<QuizQuestionList>();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [userData, setUserData] = useState<any>(null);
+    const navigate = useNavigate();
+    const backend_api = "http://localhost:8000";
 
+    useEffect(() => {
+        // Ensure user is logged in before rendering
+        if (!auth?.currentUser) {
+            navigate('/login');
+        } 
+
+        const fetchUserData = async () => {
+            try {
+                const userDbRef = doc(db, "users", auth.currentUser?.email as string);
+                const response = await getDoc(userDbRef);
+                const responseData = {
+                    ...response.data(),
+                    email: response.id
+                }
+                setUserData(responseData);
+            }
+            catch (err) {
+                console.error(err);
+            }
+        }
+
+        fetchUserData();
+    }, []);
+
+    const generate = async () => {
+        try {
+            setIsLoading(true);
+            const payload = {age: userData.age, interests: userData.interests};
+            const response = await axios.post(backend_api + "/grammar", payload);
+            const responseData = response.data;
+            setQuizContent(responseData);
+            setIsLoading(false);
+        } catch(err) {
+            console.error(err);
+        }
+    }
     // Fetch quizzes from Firestore
     useEffect(() => {
         const fetchQuizzes = async () => {
@@ -70,15 +116,32 @@ export const GrammarQuizList = () => {
 
 
     return (
-        <Flex>
+        <>
+        <Navbar />
             {/* Left Column */}
 
-            <Navbar />
-            <Box width="25%" borderRight="1px solid #ccc" p={4}>
-                <Text fontSize="xl" fontWeight="bold" mb={4}>
+                {/* <Text fontSize="xl" fontWeight="bold" mb={4}>
                     Your Grammar Quizzes
-                </Text>
-                <VStack spacing={3} align="stretch">
+                </Text> */}
+            <Flex flexDirection="row" width="90%">
+            
+                <VStack spacing={3} align="stretch" overflow="auto">
+                <Box 
+                            p={3}
+                            bg="blue.300" // Ensure a default background color is set
+
+                            border="1px solid #ccc"
+                            borderRadius="md"
+                            cursor="pointer"
+                            onClick={() => {
+                                setSelectedComponent("Grammar"); // Set the selected component to Grammar
+                                generate();
+                                setSelectedQuiz(null); // Clear any selected quiz
+                            }}
+                            _hover={{ backgroundColor: "blue.500", color: "white" }}
+                            >                            
+                        <Text fontWeight="bold">New Quiz</Text>
+                        </Box>
                     {quizzes.map((quiz, index) => (
                         <Box
                             key={index}
@@ -88,8 +151,7 @@ export const GrammarQuizList = () => {
                             cursor="pointer"
                             onClick={() => {
                                 setSelectedQuiz(quiz);
-                                setGraded(false); // Reset grading state
-                                setScore(null); // Reset score
+                                setSelectedComponent(null); // Ensure Grammar is not shown
                             }}
                             _hover={{ backgroundColor: "gray.100" }}
                         >
@@ -98,15 +160,22 @@ export const GrammarQuizList = () => {
                         </Box>
                     ))}
                 </VStack>
-            </Box>
-
             {/* Main Area */}
-            <Box width="75%" p={4}>
-                {selectedQuiz ? (
+            <Box width="75%" p={4} overflow="auto">
+            {selectedComponent === "Grammar" ? (
+                quizContent&&~isLoading ? 
+                <div className="quiz">
+                    <GrammarQuiz quiz={quizContent.quiz} correctAnswers={quizContent.correctAnswers}/> 
+                </div>:
+                <div>
+                    Generating
+                </div>
+                
+                ) :selectedQuiz ? (
                     <>
                         <Text fontSize="2xl" fontWeight="bold" mb={4}>
                             Quiz Details
-                        </Text>
+                        </Text> 
                         <VStack align="stretch" spacing={4}>
                         {selectedQuiz.questions.map((q: any, index: number) => (
                                 <>
@@ -135,12 +204,13 @@ export const GrammarQuizList = () => {
                             </>
                             ))}
                         </VStack>
-
                     </>
                 ) : (
                     <Text>Select a quiz from the left to view its details.</Text>
                 )}
             </Box>
-        </Flex>
+            </Flex>
+
+        </>
     );
 };
