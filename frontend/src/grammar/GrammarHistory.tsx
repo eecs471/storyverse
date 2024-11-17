@@ -4,6 +4,10 @@ import { auth, db,storageBucket,storage } from "../config/firebase";
 import { Box, Flex, Text, Button, VStack, Divider,Image } from '@chakra-ui/react';
 import { Navbar } from "../Navbar";
 import { getDownloadURL, ref } from "firebase/storage";
+type Quiz = {
+    percentCorrect: number; // 每个 quiz 至少有这个属性
+    [key: string]: any; // 如果 quiz 对象可能包含其他动态键值
+  };
 
 interface QuizImageProps {
     imagePath: string; // 文件的路径，例如：quiz_images/.../image.jpg
@@ -38,33 +42,10 @@ interface QuizImageProps {
       </div>
     );
   };
-export const GrammarQuizList = () => {
-    const [quizzes, setQuizzes] = useState<any[]>([]);
-    const [selectedQuiz, setSelectedQuiz] = useState<any | null>(null);
-    const [graded, setGraded] = useState(false); // Track grading state
-    const [score, setScore] = useState<number | null>(null); // Track score for the selected quiz
+  export const GrammarQuizList: React.FC<{ quizzes: Quiz[],first_sel:Quiz }> = ({ quizzes,first_sel }) => {
+    const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(first_sel); // 初始化为 first_sel
 
-    // Fetch quizzes from Firestore
-    useEffect(() => {
-        const fetchQuizzes = async () => {
-            if (!auth.currentUser) {
-                console.error("User not logged in");
-                return;
-            }
-            try {
-                const userDbRef = doc(db, "users", auth.currentUser.email as string);
-                const docSnap = await getDoc(userDbRef);
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    setQuizzes(data.grammarquizResults || []);
-                }
-            } catch (error) {
-                console.error("Error fetching quizzes:", error);
-            }
-        };
 
-        fetchQuizzes();
-    }, []);
 
     // Simulate grading logic
 
@@ -88,8 +69,6 @@ export const GrammarQuizList = () => {
                             cursor="pointer"
                             onClick={() => {
                                 setSelectedQuiz(quiz);
-                                setGraded(false); // Reset grading state
-                                setScore(null); // Reset score
                             }}
                             _hover={{ backgroundColor: "gray.100" }}
                         >
