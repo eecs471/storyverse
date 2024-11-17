@@ -174,9 +174,13 @@ def handle_chat(userPrompt, quiz, userAnswers, correctAnswers, history):
     
     return responseContent
 
+class GrammarQuestionChatHistory(BaseModel):
+    question: str
+    answerChoices: list[str]
+
 class GrammarChatRequestBody(BaseModel):
     userPrompt: str
-    quiz: list[GrammarQuestion]
+    quiz: list[GrammarQuestionChatHistory]
     userAnswers: list[int]
     correctAnswers: list[int]
     history: list[str]
