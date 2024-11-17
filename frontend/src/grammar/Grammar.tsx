@@ -132,10 +132,6 @@ export const Grammar = () => {
                         </Flex>
                     </div>
                     <div className="dashboard-actions">
-                    <Button onClick={goToGrammarQuizzes} colorScheme="teal" mt={4}>
-                        Go to Your Grammar Quizzes
-                    </Button>
-                    
                     <Button 
                         onClick={generate}
                         isLoading={isLoading}
