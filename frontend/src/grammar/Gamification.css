@@ -2,8 +2,8 @@
     display: flex;
     flex-direction: column; /* Stack content vertically */
     align-items: center; /* Center items horizontally */
-    gap: 7rem; /* Add spacing between the button and gamification */
-    margin-top: 7rem; /* Add spacing between sections */
+    gap: 4rem; /* Add spacing between the button and gamification */
+    margin-top: 2rem; /* Add spacing between sections */
 }
 
 .gamification-box {
