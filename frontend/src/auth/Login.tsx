@@ -25,15 +25,23 @@ export const Login = () => {
         <div className="login" style={{display: 'flex', flexDirection: 'column'}}>
             <strong style={{fontSize: 20}}> Login </strong>
             <Input
+            borderColor="gray.500"
+                  borderRadius="md"
+                  focusBorderColor="blue.500"
                 placeholder="Email"
+                marginBottom="10px"
                 onChange={(e) => setEmail(e.target.value)}
             />
             <Input
+            borderColor="gray.500"
+                  borderRadius="md"
+                  focusBorderColor="blue.500"
+                  marginBottom="10px"
                 placeholder="Password"
                 type="password"
                 onChange={(e) => setPassword(e.target.value)}
             />
-            <Button onClick={signIn}> Sign In </Button>
+            <Button onClick={signIn} marginBottom="10px"> Sign In </Button>
 
             <strong>Don't have an account? <Button onClick={() => navigate("../signup")}> Sign Up </Button></strong>
         </div>

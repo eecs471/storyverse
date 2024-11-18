@@ -45,33 +45,55 @@ export const Signup = () => {
 
             <Input
                 placeholder="Email"
+                borderColor="gray.500"
+                  borderRadius="md"
+                  focusBorderColor="blue.500"
+                  marginBottom="10px"
                 onChange={(e) => setEmail(e.target.value)}
             />
 
             <Input
                 placeholder="Password"
                 type="password"
+                borderColor="gray.500"
+                  borderRadius="md"
+                  focusBorderColor="blue.500"
+                  marginBottom="10px"
                 onChange={(e) => setPassword(e.target.value)}
             />
 
             <Input
                 placeholder="Name"
+                borderColor="gray.500"
+                  borderRadius="md"
+                  focusBorderColor="blue.500"
+                  marginBottom="10px"
                 onChange={(e) => setName(e.target.value)}
             />
 
             <Input
                 placeholder="Age"
                 type="number"
+                borderColor="gray.500"
+                  borderRadius="md"
+                  focusBorderColor="blue.500"
+                  marginBottom="10px"
                 onChange={(e) => setAge(Number(e.target.value))}
             />
 
             <div className="interest">
                 <Input
+                borderColor="gray.500"
+                  borderRadius="md"
+                  focusBorderColor="blue.500"
+                  marginBottom="10px"
                     placeholder="Interest"
                     value={interest}
                     onChange={(e) => setInterest(e.target.value)}
                 />
-                <Button onClick={() => {setInterests([...interests, interest]); setInterest("")}}> Add </Button>
+                <Button onClick={() => {setInterests([...interests, interest]); setInterest("")}} borderColor="gray.500"
+                  borderRadius="md"
+                  marginBottom="10px"> Add </Button>
             </div>
 
             {interests.length > 0 ? <strong>Interests:</strong> : <strong>No Interests Added</strong>}
